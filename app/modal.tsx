@@ -1,18 +1,27 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, TextInput } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import PerkSelector from '@/components/PerkSelector';
 
 export default function ModalScreen() {
-  const { day } = useLocalSearchParams();
+  const { selectedDay } = useLocalSearchParams<{ selectedDay: string }>();
+  const [text, setText] = useState("Moin")
   
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{day}</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/modal.tsx" />
+
+      <View style={styles.perkContainer}>
+        <PerkSelector />
+      </View>
+
+      <TextInput
+        style={styles.textContainer}
+        multiline={true}
+        onChangeText={(text) => setText(text)}
+        value={text}/>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
@@ -23,8 +32,15 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingBottom: 20,
+  },
+  perkContainer: {
+    flexGrow: 0,
+  },
+  textContainer: {
+    padding: 16,
+    marginBottom: 40,
+    flexGrow: 2,
   },
   title: {
     fontSize: 20,

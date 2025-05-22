@@ -47,12 +47,21 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  
+  function formatDayString(dayString: string) {
+    return new Date(dayString).toDateString();
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="modal"
+          options={({ route }) => ({
+            presentation: 'modal',
+            headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
+          })}
+        />
       </Stack>
     </ThemeProvider>
   );
