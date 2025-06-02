@@ -1,27 +1,61 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, TextInput } from 'react-native';
+import { Platform, Pressable, StyleSheet, TextInput } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import PerkSelector from '@/components/PerkSelector';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ModalScreen() {
-  const { selectedDay } = useLocalSearchParams<{ selectedDay: string }>();
-  const [text, setText] = useState("Moin")
+  const [text, setText] = useState("Moin");
+  const [selectedPerks, setSelectedPerks] = useState<string[]>([]);
+
+  function togglePerk(key: string) {
+    function isPerkSelected(key: string) {
+      return selectedPerks.find((perk) => perk == key);
+    }
+
+    if (isPerkSelected(key)) {
+      let updatedPerks = selectedPerks.filter((perk) => perk !== key);
+      setSelectedPerks(updatedPerks);
+    } else {
+      let updatedPerks = [...selectedPerks, key];
+      setSelectedPerks(updatedPerks);
+    }
+  }
+
+  function deleteEntry() {
+    console.log('deleting entry');
+  }
+  
+  function addEntry() {
+    console.log('adding entry');
+  }
   
   return (
     <View style={styles.container}>
 
       <View style={styles.perkContainer}>
-        <PerkSelector />
+        <PerkSelector selectedPerks={selectedPerks} onPerkToggle={(key: string) => togglePerk(key)} />
       </View>
+
+      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
       <TextInput
         style={styles.textContainer}
         multiline={true}
         onChangeText={(text) => setText(text)}
-        value={text}/>
+        value={text}
+      />
+
+      <View style={styles.buttonContainer}>
+        <Pressable onPress={deleteEntry} style={styles.button}>
+          <Ionicons name="trash" size={20} color="white"></Ionicons>
+        </Pressable>
+        <Pressable onPress={addEntry} style={[styles.button, { flexGrow: 100 }]}>
+          <Text style={styles.buttonText}>Add Entry</Text>
+        </Pressable>
+      </View>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
@@ -46,9 +80,34 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  buttonContainer: {
+    display: "flex",
+    flexDirection: "row",
+    padding: 16
+  },
+  button: {
+    gap: 5,
+    borderWidth: 2,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 50,
+    marginRight: 10,
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    fontSize: 20,
+    color: "white"
+  },
   separator: {
-    marginVertical: 30,
+    margin: "auto",
     height: 1,
-    width: '80%',
+    width: '100%',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
   },
 });

@@ -1,29 +1,39 @@
 import Colors from "@/constants/Colors";
+import { defaultPerks } from "@/constants/Perks";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 
-export default function PerkSelector() {
-  const availablePerks = [
-    { key: "vacation", title: "Vacation", color: "orange", icon: "airplane" },
-    { key: "nutrition", title: "Nutrition", color: "red", icon: "nutrition" },
-    { key: "reading", title: "Reading", color: "blue", icon: "book" },
-    { key: "household", title: "Household", color: "green", icon: "home" },
-  ];
+interface PerkSelectorProps {
+  selectedPerks: string[], 
+  onPerkToggle: (perkKey: string) => void
+}
+
+export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelectorProps) {
+  const availablePerks = defaultPerks;
+
+  function isPerkSelected(key: string) {
+    return selectedPerks.find((perk) => perk == key);
+  }
 
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.container}
-    >      
-    {availablePerks.map((perk) => (
-        <Pressable key={perk.key} style={[
-          styles.chip,
-          {
-            borderColor: perk.color,
-          }
-        ]}>
+    >
+      {availablePerks.map((perk) => (
+        <Pressable
+          key={perk.key}
+          onPress={() => onPerkToggle(perk.key)}
+          style={[
+            styles.chip,
+            {
+              borderColor: perk.color,
+              backgroundColor: isPerkSelected(perk.key) ? perk.color : "",
+            },
+          ]}
+        >
           <Ionicons
             name={perk.icon as React.ComponentProps<typeof Ionicons>["name"]}
           />
@@ -51,5 +61,5 @@ const styles = StyleSheet.create({
     marginRight: 10,
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
 });
