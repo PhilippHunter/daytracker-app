@@ -10,6 +10,7 @@ interface PerkSelectorProps {
 }
 
 export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelectorProps) {
+  // TODO: future goal to add more perks from user input
   const availablePerks = defaultPerks;
 
   function isPerkSelected(key: string) {

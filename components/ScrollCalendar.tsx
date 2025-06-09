@@ -7,35 +7,44 @@ import { router } from "expo-router";
 import { toDateId } from "@marceloterreiro/flash-calendar";
 import { getAllEntries } from "@/app/database/DataService";
 import { Entry } from "@/app/database/Entry";
+import { defaultPerks } from "@/constants/Perks";
 
 export default function ScrollCalendar() {
   const [entries, setEntries] = useState<Entry[]>([]);
 
-  // Perks
-  const vacation = { key: "vacation", color: "orange" };
-  const massage = { key: "massage", color: "red" };
-  const workout = { key: "workout", color: "blue" };
-
   // Calendar props
+  // const markedDates = Object.fromEntries(
+  //   entries.map((entry) => {
+  //     let dots: any[] = [];
+  //     const perksArray = Array.isArray(entry.perks) ? entry.perks : [];
+  //     if (perksArray.length !== 0) {
+  //       dots = perksArray
+  //         .map((perkKey) => defaultPerks.find((defaultPerk) => defaultPerk.key === perkKey))
+  //         .filter(Boolean);
+  //     }
+  //     return [entry.date, { dots: dots }];
+  //   })
+  // );
+  // console.log(markedDates);
   const markedDates = {
-    "2025-05-17": { dots: [vacation, massage, workout] },
-    "2025-05-18": { dots: [massage, workout] },
+    "2025-05-28": { dots: [defaultPerks[1], defaultPerks[2]] },
   };
   const today = toDateId(new Date());
 
   // Load Entries from DB
   useEffect(() => {
-    const fetchEntries = async function() {
+    const fetchEntries = async function () {
       try {
-        const entries = await getAllEntries();
-        setEntries(entries);
+        const allEntries = await getAllEntries();
+        setEntries(allEntries);
+        console.log(allEntries);
       } catch (error) {
         // show error msg
       }
-    }
+    };
 
     fetchEntries();
-  }, [])
+  }, []);
 
   return (
     <CalendarList

@@ -34,7 +34,14 @@ export function initDB() {
 // Fetch all day entries
 export async function getAllEntries(): Promise<Entry[]> {
   try {
-    return await db.getAllAsync<Entry>(`SELECT * FROM entries;`);
+    const entries = await db.getAllAsync<Entry>(`SELECT * FROM entries;`);
+    return entries.map((entry) => { 
+        return {
+            ...entry,
+            // parse JSON array for perks (change to db relation later)
+            perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry.perks ?? "[]")
+        };
+    });
   } catch (error) {
     console.error("Failed to fetch entries: ", error);
     throw error;
@@ -42,6 +49,23 @@ export async function getAllEntries(): Promise<Entry[]> {
 }
 
 // Fetch one specific day entry
+export async function getEntry(dateString: string): Promise<Entry | null> {
+    try {
+        const entry = await db.getFirstAsync<Entry>(
+            `SELECT * FROM entries WHERE date = ?`, 
+            dateString
+        );
+        if (!entry) return null;
+        return {
+            ...entry,
+            // parse JSON array for perks (change to db relation later)
+            perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry?.perks ?? "[]")
+        };
+    } catch(error) {
+        console.error(`Failed to fetch Entry with date ${dateString}: `, error);
+        throw error;
+    }
+}
 
 // Add a new entry
 export function createEntry(entry: Entry): void {}

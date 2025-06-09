@@ -5,10 +5,29 @@ import { Text, View } from '@/components/Themed';
 import { useState } from 'react';
 import PerkSelector from '@/components/PerkSelector';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
+import { getEntry } from './database/DataService';
 
 export default function ModalScreen() {
+  const modalParams = useLocalSearchParams();
+
   const [text, setText] = useState("Moin");
   const [selectedPerks, setSelectedPerks] = useState<string[]>([]);
+  
+  const dayParam = modalParams.selectedDay;
+
+  useEffect(() => {
+    if (typeof dayParam === 'string') {
+      getEntry(dayParam).then((entry) => {
+        if (entry) {
+          console.log("Eintrag: ", entry);
+          setText(entry.text);
+          setSelectedPerks(entry.perks);
+        }
+      });
+    }
+  }, [dayParam]);
 
   function togglePerk(key: string) {
     function isPerkSelected(key: string) {
