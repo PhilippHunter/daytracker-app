@@ -3,16 +3,17 @@ import { Entry } from "./Entry";
 
 const db = SQLite.openDatabaseSync("daytracker.db");
 
+// Initialize DB tables
 export function initDB() {
   db.withTransactionSync(() => {
     // Create entries table
     db.execSync(
       `CREATE TABLE IF NOT EXISTS entries (
-            id TEXT PRIMARY KEY NOT NULL,
-            date TEXT NOT NULL,
-            text TEXT,
-            perks TEXT -- JSON encoded array
-            );`
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        text TEXT,
+        perks TEXT -- JSON encoded array
+      );`
     );
 
     // Insert dummy data if table is empty
@@ -31,17 +32,32 @@ export function initDB() {
   });
 }
 
+// Fetch all entries for calendar view
+export async function getAllEntriesForOverview(): Promise<Array<Omit<Entry, "text">>> {
+  try {
+    const entries = await db.getAllAsync<{ id: number; date: string; perks: string }>(
+      `SELECT id, date, perks FROM entries;`
+    );
+    return entries.map((entry) => ({
+      ...entry,
+      // parse JSON array for perks (change to db relation later)
+      perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry.perks ?? "[]"),
+    }));
+  } catch (error) {
+    console.error("Failed to fetch entries for overview: ", error);
+    throw error;
+  }
+}
+
 // Fetch all day entries
 export async function getAllEntries(): Promise<Entry[]> {
   try {
     const entries = await db.getAllAsync<Entry>(`SELECT * FROM entries;`);
-    return entries.map((entry) => { 
-        return {
-            ...entry,
-            // parse JSON array for perks (change to db relation later)
-            perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry.perks ?? "[]")
-        };
-    });
+    return entries.map((entry) => ({ 
+        ...entry,
+        // parse JSON array for perks (change to db relation later)
+        perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry.perks ?? "[]")
+    }));
   } catch (error) {
     console.error("Failed to fetch entries: ", error);
     throw error;
@@ -51,16 +67,19 @@ export async function getAllEntries(): Promise<Entry[]> {
 // Fetch one specific day entry
 export async function getEntry(dateString: string): Promise<Entry | null> {
     try {
-        const entry = await db.getFirstAsync<Entry>(
-            `SELECT * FROM entries WHERE date = ?`, 
-            dateString
-        );
-        if (!entry) return null;
-        return {
-            ...entry,
-            // parse JSON array for perks (change to db relation later)
-            perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry?.perks ?? "[]")
-        };
+      const entry = await db.getFirstAsync<Entry>(
+          `SELECT * FROM entries WHERE date = ?`, 
+          dateString
+      );
+      if (!entry) {
+        return null;
+      }
+
+      return {
+          ...entry,
+          // parse JSON array for perks (change to db relation later)
+          perks: Array.isArray(entry.perks) ? entry.perks : JSON.parse(entry?.perks ?? "[]")
+      };
     } catch(error) {
         console.error(`Failed to fetch Entry with date ${dateString}: `, error);
         throw error;
@@ -68,10 +87,68 @@ export async function getEntry(dateString: string): Promise<Entry | null> {
 }
 
 // Add a new entry
-export function createEntry(entry: Entry): void {}
+export async function createEntry(entry: Entry): Promise<Entry> {
+  try {
+    // create statement
+    const result = await db.runAsync(
+      `INSERT INTO entries (date, text, perks) VALUES (?, ?, ?);`,
+      entry.date,
+      entry.text,
+      JSON.stringify(entry.perks)
+    );
+
+    // fetch newly created entry
+    const createdEntry = await db.getFirstAsync<Entry>(
+      `SELECT * FROM entries WHERE id = ?`,
+      result.lastInsertRowId
+    );
+    if (!createdEntry) {
+      throw new Error("Failed fetching newly created Entry from DB.")
+    }
+
+    return {
+      ...createdEntry,
+      // parse JSON array for perks (change to db relation later)
+      perks: Array.isArray(createdEntry.perks) ? createdEntry.perks : JSON.parse(createdEntry?.perks ?? "[]")
+    }
+  } catch(error) {
+    console.error(`Failed to create Entry: `, error);
+    throw error;
+  }
+}
 
 // Update existing entry
-export function updateEntry(entry: Entry): void {}
+export async function updateEntry(entry: Entry): Promise<void> {
+  try {
+    await db.runAsync(
+      `UPDATE entries 
+       SET date = ?, 
+           text = ?, 
+           perks = ?
+       WHERE id = ?;`,
+      entry.date,
+      entry.text,
+      JSON.stringify(entry.perks),
+      entry.id
+    );
+  } catch (error) {
+    console.error(`Failed to update Entry with date ${entry.date}: `, error)
+    throw error;
+  }
+}
 
 // Delete existing entry
-export function deleteEntry(entry: Entry): void {}
+export async function deleteEntry(entry: Entry): Promise<void> {
+    try {
+    await db.runAsync(`DELETE FROM entries WHERE id = ?`, entry.id);
+  } catch (error) {
+    console.error(`Failed to update Entry with date ${entry.date}: `, error)
+    throw error;
+  }
+
+}
+
+// Reset DB for dev purposes
+export function resetDB() {
+  db.execSync(`DROP TABLE IF EXISTS entries;`);
+}
