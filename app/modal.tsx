@@ -1,83 +1,123 @@
-import { StatusBar } from 'expo-status-bar';
-import { Platform, Pressable, StyleSheet, TextInput } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import { Platform, Pressable, StyleSheet, TextInput } from "react-native";
 
-import { Text, View } from '@/components/Themed';
-import { useState } from 'react';
-import PerkSelector from '@/components/PerkSelector';
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
-import { getEntry } from './database/DataService';
+import { Text, View } from "@/components/Themed";
+import { useState } from "react";
+import PerkSelector from "@/components/PerkSelector";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
+import { createEntry, deleteEntry, getEntry, updateEntry } from "./database/DataService";
+import { Entry } from "./database/Entry";
 
 export default function ModalScreen() {
   const modalParams = useLocalSearchParams();
-
-  const [text, setText] = useState("Moin");
-  const [selectedPerks, setSelectedPerks] = useState<string[]>([]);
-  
-  const dayParam = modalParams.selectedDay;
+  const dayParam = modalParams.selectedDay as string;
+  const [entry, setEntry] = useState<Entry>({
+    id: -1,
+    date: dayParam,
+    text: "Moin",
+    perks: [],
+  });
 
   useEffect(() => {
-    if (typeof dayParam === 'string') {
-      getEntry(dayParam).then((entry) => {
-        if (entry) {
-          console.log("Eintrag: ", entry);
-          setText(entry.text);
-          setSelectedPerks(entry.perks);
-        }
-      });
-    }
+    getEntry(dayParam).then((fetchedEntry) => {
+      if (fetchedEntry) {
+        console.log("Eintrag: ", fetchedEntry);
+        setEntry(fetchedEntry);
+      }
+    });
   }, [dayParam]);
 
   function togglePerk(key: string) {
     function isPerkSelected(key: string) {
-      return selectedPerks.find((perk) => perk == key);
+      return entry.perks.find((perk) => perk == key);
     }
 
     if (isPerkSelected(key)) {
-      let updatedPerks = selectedPerks.filter((perk) => perk !== key);
-      setSelectedPerks(updatedPerks);
+      // remove perk
+      let updatedPerks = entry.perks.filter((perk) => perk !== key);
+      setEntry({ ...entry, perks: updatedPerks });
     } else {
-      let updatedPerks = [...selectedPerks, key];
-      setSelectedPerks(updatedPerks);
+      // add perk
+      let updatedPerks = [...entry.perks, key];
+      setEntry({ ...entry, perks: updatedPerks });
+    }
+  }
+  
+  async function add() {
+    try {
+      console.log("adding entry");
+      const newEntry = await createEntry(entry);
+      setEntry(newEntry);
+    } catch (error) {
+      // Show error msg
+      console.log('failed...');
+    }
+  }
+  
+  async function update() {
+    try {
+      console.log("updating entry");
+      await updateEntry(entry);
+    } catch (error) {
+      // Show error msg
+      console.log('failed...');
     }
   }
 
-  function deleteEntry() {
-    console.log('deleting entry');
+  async function destroy() {
+    try {
+      console.log("deleting entry");
+      await deleteEntry(entry);
+      router.dismiss();
+    } catch (error) {
+      // Show error msg
+      console.log('failed...');
+    }
   }
-  
-  function addEntry() {
-    console.log('adding entry');
-  }
-  
+
   return (
     <View style={styles.container}>
-
       <View style={styles.perkContainer}>
-        <PerkSelector selectedPerks={selectedPerks} onPerkToggle={(key: string) => togglePerk(key)} />
+        <PerkSelector
+          selectedPerks={entry.perks}
+          onPerkToggle={(key: string) => togglePerk(key)}
+        />
       </View>
 
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+      <View
+        style={styles.separator}
+        lightColor="#eee"
+        darkColor="rgba(255,255,255,0.1)"
+      />
 
       <TextInput
         style={styles.textContainer}
         multiline={true}
-        onChangeText={(text) => setText(text)}
-        value={text}
+        onChangeText={(text) => setEntry({ ...entry, text: text })}
+        value={entry.text}
       />
 
       <View style={styles.buttonContainer}>
-        <Pressable onPress={deleteEntry} style={styles.button}>
-          <Ionicons name="trash" size={20} color="white"></Ionicons>
-        </Pressable>
-        <Pressable onPress={addEntry} style={[styles.button, { flexGrow: 100 }]}>
-          <Text style={styles.buttonText}>Add Entry</Text>
-        </Pressable>
+        {entry.id == -1 ? (
+          <Pressable onPress={add} style={[styles.button, { flexGrow: 100 }]}>
+            <Text style={styles.buttonText}>Add Entry</Text>
+          </Pressable>
+        ) : (
+          <>
+            <Pressable onPress={destroy} style={styles.button}>
+              <Ionicons name="trash" size={20} color="white"></Ionicons>
+            </Pressable>
+            <Pressable onPress={update} style={[styles.button, { flexGrow: 100 }]}>
+              <Text style={styles.buttonText}>Update Entry</Text>
+            </Pressable>
+          </>
+        )}
       </View>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
+      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </View>
   );
 }
@@ -97,12 +137,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   buttonContainer: {
     display: "flex",
     flexDirection: "row",
-    padding: 16
+    padding: 16,
   },
   button: {
     gap: 5,
@@ -117,12 +157,12 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 20,
-    color: "white"
+    color: "white",
   },
   separator: {
     margin: "auto",
     height: 1,
-    width: '100%',
+    width: "100%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
