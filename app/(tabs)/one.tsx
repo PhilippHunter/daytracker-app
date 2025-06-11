@@ -1,3 +1,4 @@
+import { StyledText } from "@/components/StyledText";
 import { Calendar, toDateId } from "@marceloterreiro/flash-calendar";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -9,7 +10,7 @@ export default function TabOneScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text>Selected date: {selectedDate}</Text>
+      <StyledText>Selected date: {selectedDate}</StyledText>
       <Calendar.List
         calendarActiveDateRanges={[
           {

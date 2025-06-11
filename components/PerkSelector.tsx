@@ -3,6 +3,7 @@ import { defaultPerks } from "@/constants/Perks";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { StyledText } from "./StyledText";
 
 interface PerkSelectorProps {
   selectedPerks: string[], 
@@ -38,7 +39,7 @@ export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelector
           <Ionicons
             name={perk.icon as React.ComponentProps<typeof Ionicons>["name"]}
           />
-          <Text>{perk.title}</Text>
+          <StyledText>{perk.title}</StyledText>
         </Pressable>
       ))}
     </ScrollView>

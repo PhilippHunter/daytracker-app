@@ -2,13 +2,14 @@ import { StatusBar } from "expo-status-bar";
 import { Platform, Pressable, StyleSheet, TextInput } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { useState } from "react";
+import React, { useState } from "react";
 import PerkSelector from "@/components/PerkSelector";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { createEntry, deleteEntry, getEntry, updateEntry } from "./database/DataService";
 import { Entry } from "./database/Entry";
+import { StyledText } from "../components/StyledText";
 
 export default function ModalScreen() {
   const modalParams = useLocalSearchParams();
@@ -102,15 +103,15 @@ export default function ModalScreen() {
       <View style={styles.buttonContainer}>
         {entry.id == -1 ? (
           <Pressable onPress={add} style={[styles.button, { flexGrow: 100 }]}>
-            <Text style={styles.buttonText}>Add Entry</Text>
+            <StyledText style={styles.buttonText}>Add</StyledText>
           </Pressable>
         ) : (
           <>
             <Pressable onPress={destroy} style={styles.button}>
-              <Ionicons name="trash" size={20} color="white"></Ionicons>
+              <Ionicons name="trash" size={15} color="white"></Ionicons>
             </Pressable>
             <Pressable onPress={update} style={[styles.button, { flexGrow: 100 }]}>
-              <Text style={styles.buttonText}>Update Entry</Text>
+              <StyledText style={styles.buttonText}>Update</StyledText>
             </Pressable>
           </>
         )}
@@ -134,6 +135,9 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 40,
     flexGrow: 2,
+    fontFamily: "Roboto",
+    lineHeight: 22,
+    fontSize: 15
   },
   title: {
     fontSize: 20,
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
   button: {
     gap: 5,
     borderWidth: 2,
-    paddingVertical: 6,
+    paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 50,
     marginRight: 10,
@@ -156,8 +160,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: 15,
     color: "white",
+    fontFamily: "Roboto",
+
   },
   separator: {
     margin: "auto",

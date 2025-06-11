@@ -25,6 +25,10 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    Roboto: require('../assets/fonts/Roboto-VariableFont_wdth,wght.ttf'),
+    RobotoItalic: require('../assets/fonts/Roboto-Italic-VariableFont_wdth,wght.ttf'),
+    PublicSans: require('../assets/fonts/PublicSans-VariableFont_wght.ttf'),
+    PublicSansItalic: require('../assets/fonts/PublicSans-Italic-VariableFont_wght.ttf'),
     ...FontAwesome.font,
   });
 

@@ -53,6 +53,9 @@ export default function ScrollCalendar() {
       onDayPress={(day) =>
         router.push({ pathname: "/modal", params: { selectedDay: day.dateString } })
       }
+      theme={{
+        todayTextColor: "black",
+      }}
     />
   );
 }
