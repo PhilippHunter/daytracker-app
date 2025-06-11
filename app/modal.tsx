@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Platform, Pressable, StyleSheet, TextInput } from "react-native";
+import { Platform, Pressable, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import React, { useState } from "react";
@@ -102,16 +102,16 @@ export default function ModalScreen() {
 
       <View style={styles.buttonContainer}>
         {entry.id == -1 ? (
-          <Pressable onPress={add} style={[styles.button, { flexGrow: 100 }]}>
+          <TouchableOpacity onPress={add} style={[styles.button, { flexGrow: 100 }]}>
             <StyledText style={styles.buttonText}>Add</StyledText>
-          </Pressable>
+          </TouchableOpacity>
         ) : (
           <>
-            <Pressable onPress={destroy} style={styles.button}>
+            <TouchableOpacity onPress={destroy} style={styles.button}>
               <Ionicons name="trash" size={15} color="white"></Ionicons>
-            </Pressable>
-            <Pressable onPress={update} style={[styles.button, { flexGrow: 100 }]}>
-              <StyledText style={styles.buttonText}>Update</StyledText>
+            </TouchableOpacity>
+            <Pressable onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
+              <StyledText style={[styles.buttonText]}>Update</StyledText>
             </Pressable>
           </>
         )}
@@ -163,7 +163,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "white",
     fontFamily: "Roboto",
-
+    letterSpacing: 2,
+    textTransform: "uppercase"
   },
   separator: {
     margin: "auto",

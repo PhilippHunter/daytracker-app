@@ -1,6 +1,6 @@
 export const defaultPerks = [
-    { key: "sport", title: "Sport", color: "orange", icon: "barbell" },
-    { key: "nutrition", title: "Nutrition", color: "pink", icon: "nutrition" },
-    { key: "reading", title: "Reading", color: "lightblue", icon: "book" },
-    { key: "household", title: "Household", color: "lightgreen", icon: "home" },
+    { key: "sport", title: "Sport", color: "#ff9500", icon: "barbell" },
+    { key: "nutrition", title: "Nutrition", color: "#ff94a6", icon: "nutrition" },
+    { key: "reading", title: "Reading", color: "#85daff", icon: "book" },
+    { key: "household", title: "Household", color: "#8ff7c3", icon: "home" },
 ];

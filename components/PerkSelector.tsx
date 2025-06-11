@@ -2,7 +2,7 @@ import Colors from "@/constants/Colors";
 import { defaultPerks } from "@/constants/Perks";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity } from "react-native";
 import { StyledText } from "./StyledText";
 
 interface PerkSelectorProps {
@@ -28,11 +28,13 @@ export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelector
         <Pressable
           key={perk.key}
           onPress={() => onPerkToggle(perk.key)}
-          style={[
+          style={({pressed}) => [
             styles.chip,
             {
               borderColor: perk.color,
-              backgroundColor: isPerkSelected(perk.key) ? perk.color : "",
+              backgroundColor: pressed ? `${perk.color}80` : (
+                isPerkSelected(perk.key) ? perk.color : ""
+              )
             },
           ]}
         >
