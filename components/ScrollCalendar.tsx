@@ -1,13 +1,9 @@
-import { StyleSheet } from "react-native";
-
-import { CalendarList, Agenda } from "react-native-calendars";
-import { Text, View } from "@/components/Themed";
-import { useCallback, useEffect, useState } from "react";
+import { CalendarList } from "react-native-calendars";
+import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { toDateId } from "@marceloterreiro/flash-calendar";
-import { getAllEntries, getAllEntriesForOverview } from "@/app/database/DataService";
-import { Entry } from "@/app/database/Entry";
-import { defaultPerks } from "@/constants/Perks";
+import { getAllEntriesForOverview } from "@/app/database/DataService";
+import { Entry } from "@/app/database/Models";
 
 export default function ScrollCalendar() {
   const [entries, setEntries] = useState<Array<Omit<Entry, "text">>>([]);
@@ -16,13 +12,7 @@ export default function ScrollCalendar() {
   const today = toDateId(new Date());
   const markedDates = Object.fromEntries(
     entries.map((entry) => {
-      let dots: any[] = [];
-      if (entry.perks.length !== 0) {
-        dots = entry.perks
-          .map((perkKey: any) => defaultPerks.find((defaultPerk) => defaultPerk.key === perkKey))
-          .filter(Boolean);
-      }
-      return [entry.date, { dots: dots }];
+      return [entry.date, { dots: entry.perks }];
     })
   );
 
@@ -35,7 +25,7 @@ export default function ScrollCalendar() {
           setEntries(allEntries);
           console.log("Fetched entries: ", allEntries);
         } catch (error) {
-          // show error msg
+          console.error(error);
         }
       };
       

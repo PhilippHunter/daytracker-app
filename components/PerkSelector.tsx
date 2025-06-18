@@ -1,21 +1,36 @@
 import Colors from "@/constants/Colors";
 import { defaultPerks } from "@/constants/Perks";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity } from "react-native";
 import { StyledText } from "./StyledText";
+import { Perk } from "@/app/database/Models";
+import { getAllPerks } from "@/app/database/DataService";
 
 interface PerkSelectorProps {
-  selectedPerks: string[], 
-  onPerkToggle: (perkKey: string) => void
+  selectedPerks: Perk[], 
+  onPerkToggle: (Perk: Perk) => void
 }
 
 export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelectorProps) {
-  // TODO: future goal to add more perks from user input
-  const availablePerks = defaultPerks;
+  const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
 
-  function isPerkSelected(key: string) {
-    return selectedPerks.find((perk) => perk == key);
+  useEffect(() => {
+    const fetchPerks = async function () {
+      try {
+        const allPerks = await getAllPerks();
+        setAvailablePerks(allPerks);
+        console.log("Fetched perks: ", allPerks);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPerks();
+  }, [])
+
+  function isPerkSelected(id: number) {
+    return selectedPerks.find((perk) => perk.id == id);
   }
 
   return (
@@ -26,14 +41,14 @@ export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelector
     >
       {availablePerks.map((perk) => (
         <Pressable
-          key={perk.key}
-          onPress={() => onPerkToggle(perk.key)}
+          key={perk.id}
+          onPress={() => onPerkToggle(perk)}
           style={({pressed}) => [
             styles.chip,
             {
               borderColor: perk.color,
               backgroundColor: pressed ? `${perk.color}80` : (
-                isPerkSelected(perk.key) ? perk.color : ""
+                isPerkSelected(perk.id) ? perk.color : ""
               )
             },
           ]}

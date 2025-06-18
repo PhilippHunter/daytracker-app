@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { createEntry, deleteEntry, getEntry, updateEntry } from "./database/DataService";
-import { Entry } from "./database/Entry";
+import { Entry, Perk } from "./database/Models";
 import { StyledText } from "../components/StyledText";
 
 export default function ModalScreen() {
@@ -30,18 +30,18 @@ export default function ModalScreen() {
     });
   }, [dayParam]);
 
-  function togglePerk(key: string) {
-    function isPerkSelected(key: string) {
-      return entry.perks.find((perk) => perk == key);
+  function togglePerk(toggledPerk: Perk) {
+    function isPerkSelected(id: number) {
+      return entry.perks.find((perk) => perk.id == id);
     }
 
-    if (isPerkSelected(key)) {
+    if (isPerkSelected(toggledPerk.id)) {
       // remove perk
-      let updatedPerks = entry.perks.filter((perk) => perk !== key);
+      let updatedPerks = entry.perks.filter((perk) => perk.id !== toggledPerk.id);
       setEntry({ ...entry, perks: updatedPerks });
     } else {
       // add perk
-      let updatedPerks = [...entry.perks, key];
+      let updatedPerks = [...entry.perks, toggledPerk];
       setEntry({ ...entry, perks: updatedPerks });
     }
   }
@@ -83,7 +83,7 @@ export default function ModalScreen() {
       <View style={styles.perkContainer}>
         <PerkSelector
           selectedPerks={entry.perks}
-          onPerkToggle={(key: string) => togglePerk(key)}
+          onPerkToggle={(perk: Perk) => togglePerk(perk)}
         />
       </View>
 
