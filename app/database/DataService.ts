@@ -151,35 +151,64 @@ export async function getEntry(dateString: string): Promise<Entry | null> {
   }
 }
 
-// Add a new entry
-export async function createEntry(entry: Entry): Promise<Entry> {
+// TODO: keep it DRY
+async function getEntryById(id: number): Promise<Entry | null> {
   try {
-    // create statement
-    const result = await db.runAsync(
-      `INSERT INTO entries (date, text, perks) VALUES (?, ?, ?);`,
-      entry.date,
-      entry.text,
-      JSON.stringify(entry.perks)
+    // Fetch the entry by id
+    const entry = await db.getFirstAsync<Omit<Entry, "perks">>(
+      `SELECT * FROM entries WHERE id = ?;`,
+      id
     );
-
-    // fetch newly created entry
-    const createdEntry = await db.getFirstAsync<Entry>(
-      `SELECT * FROM entries WHERE id = ?`,
-      result.lastInsertRowId
-    );
-    if (!createdEntry) {
-      throw new Error("Failed fetching newly created Entry from DB.")
+    if (!entry) {
+      return null;
     }
+
+    // Fetch the perks for this entry
+    const perks = await db.getAllAsync<Perk>(
+      `SELECT p.* FROM perks p
+        INNER JOIN entry_perks ep ON ep.perk_id = p.id
+        WHERE ep.entry_id = ?;`,
+      id
+    );
 
     return {
-      ...createdEntry,
-      // parse JSON array for perks (change to db relation later)
-      perks: Array.isArray(createdEntry.perks) ? createdEntry.perks : JSON.parse(createdEntry?.perks ?? "[]")
-    }
+      ...entry,
+      perks: perks
+    };
   } catch(error) {
-    console.error(`Failed to create Entry: `, error);
+    console.error(`Failed to fetch Entry with id ${id}: `, error);
     throw error;
   }
+}
+
+// Add a new entry
+// TODO: add perk validation (existence)
+export async function createEntry(entry: Entry): Promise<Entry> {
+  let created: Entry | null = null;   // bridge to return Entry out from the transaction
+  await db.withTransactionAsync(async () => {
+    // create statement for entry
+    const entryResult = await db.runAsync(
+      `INSERT INTO entries (date, text) VALUES (?, ?);`,
+      entry.date,
+      entry.text,
+    );
+    
+    // create statement for perk relation
+    for (const perk of entry.perks) {
+      await db.runAsync(
+        `INSERT INTO entry_perks (entry_id, perk_id) VALUES (?, ?);`,
+        entryResult.lastInsertRowId,
+        perk.id
+      );
+    }
+    
+    // fetch newly created entry
+    created = await getEntryById(entryResult.lastInsertRowId);
+  });
+  if (!created) {
+    throw new Error("Failed to create entry.");
+  }
+  return created;
 }
 
 // Update existing entry
