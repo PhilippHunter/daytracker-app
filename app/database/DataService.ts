@@ -122,7 +122,7 @@ export async function getAllEntries(): Promise<Entry[]> {
 }
 
 // Fetch one specific day entry
-export async function getEntry(dateString: string): Promise<Entry> {
+export async function getEntry(dateString: string): Promise<Entry | null> {
   try {
     // Fetch the entry by date
     const entry = await db.getFirstAsync<Omit<Entry, "perks">>(
@@ -130,7 +130,7 @@ export async function getEntry(dateString: string): Promise<Entry> {
       dateString
     );
     if (!entry) {
-      throw new Error("DB entry not found.");
+      return null;
     }
 
     // Fetch the perks for this entry

@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { createEntry, deleteEntry, getEntry, updateEntry } from "./database/DataService";
 import { Entry, Perk } from "./database/Models";
 import { StyledText } from "../components/StyledText";
+import { placeholderSnippets } from "@/constants/TextSnippets";
 
 export default function ModalScreen() {
   const modalParams = useLocalSearchParams();
@@ -17,7 +18,7 @@ export default function ModalScreen() {
   const [entry, setEntry] = useState<Entry>({
     id: -1,
     date: dayParam,
-    text: "Moin",
+    text: "",
     perks: [],
   });
 
@@ -98,6 +99,7 @@ export default function ModalScreen() {
         multiline={true}
         onChangeText={(text) => setEntry({ ...entry, text: text })}
         value={entry.text}
+        placeholder={placeholderSnippets[Math.floor(Math.random() * placeholderSnippets.length)]}
       />
 
       <View style={styles.buttonContainer}>
