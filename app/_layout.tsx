@@ -72,6 +72,13 @@ function RootLayoutNav() {
             headerBackButtonDisplayMode: "generic"
           }}
         />
+        <Stack.Screen
+          name="data-stats"
+          options={{
+            headerTitle: "Data Stats",
+            headerBackButtonDisplayMode: "generic"
+          }}
+        />
         <Stack.Screen name="modal"
           options={({ route }) => ({
             presentation: 'modal',

@@ -2,7 +2,7 @@ import * as SQLite from "expo-sqlite";
 import { Entry, Perk } from "./Models";
 import { defaultPerks } from "@/constants/Perks";
 
-const db = SQLite.openDatabaseSync("daytracker.db");
+export const db = SQLite.openDatabaseSync("daytracker.db");
 
 // Initialize DB tables
 export function initDB() {

@@ -37,7 +37,7 @@ export default function SettingsScreen() {
         </Pressable>
         <Pressable 
           style={styles.button} 
-          // onPress={() => router.push("/stats")}
+          onPress={() => router.push("/data-stats")}
         >
           <View style={styles.buttonLeft}>
             <Ionicons name="stats-chart" size={20} />
