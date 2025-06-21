@@ -184,47 +184,67 @@ async function getEntryById(id: number): Promise<Entry | null> {
 // Add a new entry
 // TODO: add perk validation (existence)
 export async function createEntry(entry: Entry): Promise<Entry> {
-  let created: Entry | null = null;   // bridge to return Entry out from the transaction
-  await db.withTransactionAsync(async () => {
-    // create statement for entry
-    const entryResult = await db.runAsync(
-      `INSERT INTO entries (date, text) VALUES (?, ?);`,
-      entry.date,
-      entry.text,
-    );
-    
-    // create statement for perk relation
-    for (const perk of entry.perks) {
-      await db.runAsync(
-        `INSERT INTO entry_perks (entry_id, perk_id) VALUES (?, ?);`,
-        entryResult.lastInsertRowId,
-        perk.id
+  try {
+    let created: Entry | null = null;   // bridge to return Entry out from the transaction
+    await db.withTransactionAsync(async () => {
+      // create statement for entry
+      const entryResult = await db.runAsync(
+        `INSERT INTO entries (date, text) VALUES (?, ?);`,
+        entry.date,
+        entry.text,
       );
+      
+      // create statement for perk relation
+      for (const perk of entry.perks) {
+        await db.runAsync(
+          `INSERT INTO entry_perks (entry_id, perk_id) VALUES (?, ?);`,
+          entryResult.lastInsertRowId,
+          perk.id
+        );
+      }
+      
+      // fetch newly created entry
+      created = await getEntryById(entryResult.lastInsertRowId);
+    });
+    if (!created) {
+      throw new Error("Failed to create entry.");
     }
-    
-    // fetch newly created entry
-    created = await getEntryById(entryResult.lastInsertRowId);
-  });
-  if (!created) {
-    throw new Error("Failed to create entry.");
+    return created;
+  } catch (error) {
+    console.error(`Failed to update Entry with date ${entry.date}: `, error)
+    throw error;
   }
-  return created;
 }
 
 // Update existing entry
 export async function updateEntry(entry: Entry): Promise<void> {
   try {
-    await db.runAsync(
-      `UPDATE entries 
-       SET date = ?, 
-           text = ?, 
-           perks = ?
-       WHERE id = ?;`,
-      entry.date,
-      entry.text,
-      JSON.stringify(entry.perks),
-      entry.id
-    );
+    await db.withTransactionAsync(async () => {
+      await db.runAsync(
+        `UPDATE entries 
+        SET date = ?, 
+        text = ?
+        WHERE id = ?;`,
+        entry.date,
+        entry.text,
+        entry.id
+      );
+      
+      // Remove all existing perks for this entry
+      await db.runAsync(
+        `DELETE FROM entry_perks WHERE entry_id = ?;`,
+        entry.id
+      );
+      
+      // Insert the new set of perks
+      for (const perk of entry.perks) {
+        await db.runAsync(
+          `INSERT INTO entry_perks (entry_id, perk_id) VALUES (?, ?);`,
+          entry.id,
+          perk.id
+        );
+      }
+    });
   } catch (error) {
     console.error(`Failed to update Entry with date ${entry.date}: `, error)
     throw error;
@@ -239,7 +259,6 @@ export async function deleteEntry(entry: Entry): Promise<void> {
     console.error(`Failed to update Entry with date ${entry.date}: `, error)
     throw error;
   }
-
 }
 
 // Get available perks

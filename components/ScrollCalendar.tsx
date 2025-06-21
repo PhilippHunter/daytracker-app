@@ -40,6 +40,7 @@ export default function ScrollCalendar() {
       maxDate={today}
       scrollEnabled={true}
       futureScrollRange={0}
+      firstDay={1}
       onDayPress={(day) =>
         router.push({ pathname: "/modal", params: { selectedDay: day.dateString } })
       }
