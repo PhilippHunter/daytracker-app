@@ -17,7 +17,7 @@ export default function SettingsScreen() {
       <View style={styles.list}>
         <Pressable
           style={styles.button}
-          // onPress={() => router.push("/perk-settings")}
+          onPress={() => router.push("/perk-settings")}
         >
           <View style={styles.buttonLeft}>
             <Ionicons name="brush" size={20}/>
