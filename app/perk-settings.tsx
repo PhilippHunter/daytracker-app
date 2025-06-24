@@ -3,11 +3,14 @@ import { FlatList, Pressable, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text } from "@/components/Themed";
 import { Perk } from "./database/Models";
-import { getAllPerks } from "./database/DataService";
+import { createPerk, deletePerk, getAllPerks, updateEntry, updatePerk } from "./database/DataService";
 import { StyledText } from "@/components/StyledText";
+import PerkEditModal from "./perk-edit-modal";
 
 export default function PerkSettingsScreen() {
   const [perks, setPerks] = useState<Perk[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [editPerk, setEditPerk] = useState<Perk>();
 
   useEffect(() => {
     fetchPerks();
@@ -18,14 +21,43 @@ export default function PerkSettingsScreen() {
     setPerks(data);
   }
 
-  function handleDelete(perk: Perk) {
+  function handleAdd() {
+    setEditPerk(undefined);
+    setModalVisible(true);
+  }
+
+  async function handleSave(perk: Perk) {
+    console.log("Saving perk: ", perk);
+    try {
+      if (!perk.id) {
+        await createPerk(perk);
+      } else {
+        await updatePerk(perk);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function handleEdit(perk: Perk) {
+    console.log("Edit button pressed on item: ", perk.title);
+    setEditPerk(perk);
+    setModalVisible(true);
+  }
+
+  async function handleDelete(perk: Perk) {
     Alert.alert(
       "Delete Perk",
       `This deletes all references in the calendar entries. Are you sure you want to delete "${perk.title}"?`,
       [
         { text: "Cancel", style: "cancel" },
         { text: "Delete", style: "destructive", onPress: async () => {
-            // TODO: Delete logic
+            try {
+              await deletePerk(perk);
+              console.log("Deleted sucessfully!");
+            } catch (error) {
+              console.error(error);
+            }
           }
         }
       ]
@@ -40,11 +72,11 @@ export default function PerkSettingsScreen() {
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View style={[styles.dot, { backgroundColor: `${item.color}` }]} />
-            <Ionicons name={item.icon} size={20} style={styles.icon} />
+            <Ionicons name={item.icon} size={22} style={styles.icon} />
             <StyledText style={styles.title}>{item.title}</StyledText>
             <View style={styles.actions}>
-              <Pressable onPress={() => { console.log("Edit button pressed on item: ", item.title) }}>
-                <Ionicons name="pencil" size={22} color="#888" />
+              <Pressable onPress={() => handleEdit(item)}>
+                <Ionicons name="pencil" size={22} color="#222" />
               </Pressable>
               <Pressable onPress={() => handleDelete(item)}>
                 <Ionicons name="trash" size={22} color="#e74c3c" />
@@ -54,33 +86,57 @@ export default function PerkSettingsScreen() {
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
-      <Pressable style={styles.fab} onPress={() => { console.log("Add button pressed") }}>
+      <Pressable style={styles.fab} onPress={() => handleAdd() }>
         <Ionicons name="add" size={32} color="#fff" />
       </Pressable>
+      
+      <PerkEditModal
+        editPerk={editPerk}
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        onSave={(perk: Perk) => handleSave(perk)}
+      ></PerkEditModal>
     </View>
+
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#fff" 
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 18,
+    padding: 25,
     justifyContent: "space-between",
   },
   dot: {
     borderRadius: 50,
-    width: 15,
-    height: 15,
+    width: 20,
+    height: 20,
     marginRight: 16,
     borderColor: "black",
     borderWidth: 1,
   },
-  icon: { marginRight: 16 },
-  title: { flex: 1, fontSize: 18 },
-  actions: { flexDirection: "row", gap: 18 },
-  separator: { height: 1, backgroundColor: "#eee", marginHorizontal: 16 },
+  icon: { 
+    marginRight: 16,
+    color: "#222",
+  },
+  title: { 
+    flex: 1, 
+    fontSize: 20 
+  },
+  actions: { 
+    flexDirection: "row", 
+    gap: 18 
+  },
+  separator: { 
+    height: 1, 
+    backgroundColor: "#eee", 
+    marginHorizontal: 16 
+  },
   fab: {
     position: "absolute",
     right: 24,

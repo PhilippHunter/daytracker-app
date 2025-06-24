@@ -18,7 +18,6 @@ export function initDB() {
         text TEXT
       );`
     );
-    console.log('Created table "entries"!');
 
     // Create perks table
     db.execSync(`
@@ -183,6 +182,7 @@ async function getEntryById(id: number): Promise<Entry | null> {
 
 // Add a new entry
 // TODO: add perk validation (existence)
+// TODO: add field validation (full Entry field must be provided)
 export async function createEntry(entry: Entry): Promise<Entry> {
   try {
     let created: Entry | null = null;   // bridge to return Entry out from the transaction
@@ -211,7 +211,7 @@ export async function createEntry(entry: Entry): Promise<Entry> {
     }
     return created;
   } catch (error) {
-    console.error(`Failed to update Entry with date ${entry.date}: `, error)
+    console.error(`Failed to create Entry with date ${entry.date}: `, error)
     throw error;
   }
 }
@@ -267,6 +267,67 @@ export async function getAllPerks(): Promise<Perk[]> {
     return await db.getAllAsync<Perk>(`SELECT * FROM perks;`);
   } catch (error) {
     console.error("Failed to fetch entries: ", error);
+    throw error;
+  }
+}
+
+// Get Perk by id helper
+async function getPerkById(id: number): Promise<Perk | null> {
+  try {
+    return await db.getFirstAsync<Perk>(`SELECT * FROM perks WHERE id = ?;`, id);
+  } catch (error) {
+    console.error(`Failed to fetch perk with id ${id}: `, error);
+    throw error;
+  }
+}
+
+// Update specific Perk
+export async function updatePerk(perk: Perk): Promise<void> {
+  try {
+    await db.runAsync(
+      `UPDATE perks 
+      SET title = ?, 
+      color = ?,
+      icon = ?
+      WHERE id = ?;`,
+      perk.title,
+      perk.color,
+      perk.icon,
+      perk.id
+    );
+  } catch (error) {
+    console.error(`Failed to update Perk with id ${perk.id}: `, error);
+    throw error;
+  }
+}
+
+// Create new Perk
+export async function createPerk(perk: Perk): Promise<Perk> {
+  try {
+    const result = await db.runAsync(
+      `INSERT INTO perks (title, color, icon) VALUES (?, ?, ?);`,
+      perk.title, 
+      perk.color,
+      perk.icon
+    );
+
+    const created = await getPerkById(result.lastInsertRowId);
+    if (!created) {
+      throw new Error(`Failed to fetch created perk with id ${result.lastInsertRowId}`);
+    }
+    return created;
+  } catch (error) {
+    console.error(`Failed to create perk with title ${perk.title}: `, error);
+    throw error;
+  }
+}
+
+// Delete existing Perk
+export async function deletePerk(perk: Perk): Promise<void> {
+  try {
+    await db.runAsync(`DELETE FROM perks WHERE id = ?;`, perk.id);
+  } catch (error) {
+    console.error(`Failed to update Perk with title ${perk.title}: `, error)
     throw error;
   }
 }
