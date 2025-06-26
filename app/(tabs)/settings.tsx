@@ -8,7 +8,9 @@ import { Ionicons } from "@expo/vector-icons";
 export default function SettingsScreen() {
   return (
     <View style={styles.container}>
-      <View style={styles.logo}>{/* Placeholder for logo */}</View>
+      <View style={styles.logo}>
+        <Ionicons name="calendar" size={64} color="#222" />
+      </View>
 
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 

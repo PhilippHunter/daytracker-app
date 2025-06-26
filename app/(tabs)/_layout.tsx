@@ -32,7 +32,7 @@ export default function TabLayout() {
           title: 'Calendar',
           tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/info" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
