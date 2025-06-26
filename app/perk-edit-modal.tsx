@@ -22,7 +22,7 @@ export default function PerkEditModal(props: PerkEditModalProps) {
   }, [props.visible]);
 
   return (
-    <Modal visible={props.visible} animationType="fade" transparent>
+    <Modal visible={props.visible} animationType="slide" transparent>
       <View style={styles.background}>
         <View style={styles.box}>
           <StyledText style={styles.header}>
@@ -73,15 +73,21 @@ export default function PerkEditModal(props: PerkEditModalProps) {
 
 const styles = StyleSheet.create({
   background: {
-    flex: 1, 
-    justifyContent: "center", 
-    backgroundColor: "#0008" 
+    flex: 1,
+    justifyContent: "center",
   },
-  box: { 
-    margin: 32, 
-    backgroundColor: "#fff", 
-    borderRadius: 12, 
-    padding: 24 
+  box: {
+    margin: 32,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 24,
+    // Box shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    // Elevation for Android
+    elevation: 12
   },
   header: {
     textAlign: "center",
@@ -96,7 +102,7 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     fontWeight: "bold"
   },
-  input: { 
+  input: {
     marginBottom: 12,
     padding: 10,
     borderStyle: "solid",
@@ -104,9 +110,9 @@ const styles = StyleSheet.create({
     borderColor: "lightgrey",
     borderRadius: 50
   },
-  actions: { 
-    flexDirection: "row", 
-    justifyContent: "flex-end", 
-    gap: 12 
+  actions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12
   }
 });

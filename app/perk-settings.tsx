@@ -1,21 +1,23 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text } from "@/components/Themed";
 import { Perk } from "./database/Models";
 import { createPerk, deletePerk, getAllPerks, updateEntry, updatePerk } from "./database/DataService";
-import { StyledText } from "@/components/StyledText";
 import PerkEditModal from "./perk-edit-modal";
 import PerkComponent from "@/components/Perk";
+import { useFocusEffect } from "expo-router";
 
 export default function PerkSettingsScreen() {
   const [perks, setPerks] = useState<Perk[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [editPerk, setEditPerk] = useState<Perk>();
 
-  useEffect(() => {
-    fetchPerks();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchPerks();
+    }, [])
+  );
 
   async function fetchPerks() {
     const data = await getAllPerks();
@@ -35,6 +37,8 @@ export default function PerkSettingsScreen() {
       } else {
         await updatePerk(perk);
       }
+      fetchPerks();
+      setModalVisible(false);
     } catch (error) {
       console.error(error);
     }
@@ -55,6 +59,7 @@ export default function PerkSettingsScreen() {
         { text: "Delete", style: "destructive", onPress: async () => {
             try {
               await deletePerk(perk);
+              fetchPerks();
               console.log("Deleted sucessfully!");
             } catch (error) {
               console.error(error);
@@ -75,7 +80,7 @@ export default function PerkSettingsScreen() {
             <PerkComponent perk={item} initialActivity={true} onPerkToggle={() => { return null; }} />
             <View style={styles.actions}>
               <Pressable onPress={() => handleEdit(item)}>
-                <Ionicons name="pencil" size={22} color="#222" />
+                <Ionicons name="brush" size={22} color="#222" />
               </Pressable>
               <Pressable onPress={() => handleDelete(item)}>
                 <Ionicons name="trash" size={22} color="#222" />
@@ -85,7 +90,7 @@ export default function PerkSettingsScreen() {
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
-      
+
       <Pressable style={styles.fab} onPress={() => handleAdd() }>
         <Ionicons name="add" size={32} color="#fff" />
       </Pressable>
