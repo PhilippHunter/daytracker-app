@@ -6,6 +6,7 @@ import { Perk } from "./database/Models";
 import { createPerk, deletePerk, getAllPerks, updateEntry, updatePerk } from "./database/DataService";
 import { StyledText } from "@/components/StyledText";
 import PerkEditModal from "./perk-edit-modal";
+import PerkComponent from "@/components/Perk";
 
 export default function PerkSettingsScreen() {
   const [perks, setPerks] = useState<Perk[]>([]);
@@ -66,26 +67,25 @@ export default function PerkSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <FlatList
+      <FlatList 
         data={perks}
         keyExtractor={perk => perk.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <View style={[styles.dot, { backgroundColor: `${item.color}` }]} />
-            <Ionicons name={item.icon} size={22} style={styles.icon} />
-            <StyledText style={styles.title}>{item.title}</StyledText>
+            <PerkComponent perk={item} initialActivity={true} onPerkToggle={() => { return null; }} />
             <View style={styles.actions}>
               <Pressable onPress={() => handleEdit(item)}>
                 <Ionicons name="pencil" size={22} color="#222" />
               </Pressable>
               <Pressable onPress={() => handleDelete(item)}>
-                <Ionicons name="trash" size={22} color="#e74c3c" />
+                <Ionicons name="trash" size={22} color="#222" />
               </Pressable>
             </View>
           </View>
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
+      
       <Pressable style={styles.fab} onPress={() => handleAdd() }>
         <Ionicons name="add" size={32} color="#fff" />
       </Pressable>

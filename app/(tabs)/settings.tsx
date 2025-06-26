@@ -1,11 +1,9 @@
 import { Pressable, StyleSheet } from "react-native";
 
-import EditScreenInfo from "@/components/EditScreenInfo";
-import { Text, View } from "@/components/Themed";
+import { View } from "@/components/Themed";
 import { StyledText } from "@/components/StyledText";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { createEntry } from "../database/DataService";
 
 export default function SettingsScreen() {
   return (
@@ -17,21 +15,21 @@ export default function SettingsScreen() {
       <View style={styles.list}>
         <Pressable
           style={styles.button}
-          onPress={() => router.push("/perk-settings")}
-        >
-          <View style={styles.buttonLeft}>
-            <Ionicons name="brush" size={20}/>
-            <StyledText style={styles.buttonText}>Perk Customization</StyledText>
-          </View>
-          <Ionicons name="chevron-forward" size={20}/>
-        </Pressable>
-        <Pressable
-          style={styles.button}
           // onPress={() => router.push("/data-settings")}
         >
           <View style={styles.buttonLeft}>
             <Ionicons name="calendar-outline" size={20} />
             <StyledText style={styles.buttonText}>Data Settings</StyledText>
+          </View>
+          <Ionicons name="chevron-forward" size={20}/>
+        </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={() => router.push("/perk-settings")}
+        >
+          <View style={styles.buttonLeft}>
+            <Ionicons name="brush" size={20}/>
+            <StyledText style={styles.buttonText}>Perk Customization</StyledText>
           </View>
           <Ionicons name="chevron-forward" size={20}/>
         </Pressable>

@@ -32,11 +32,7 @@ export default function ModalScreen() {
   }, [dayParam]);
 
   function togglePerk(toggledPerk: Perk) {
-    function isPerkSelected(id: number) {
-      return entry.perks.find((perk) => perk.id == id);
-    }
-
-    if (isPerkSelected(toggledPerk.id)) {
+    if (entry.perks.some((perk) => perk.id === toggledPerk.id)) {
       // remove perk
       let updatedPerks = entry.perks.filter((perk) => perk.id !== toggledPerk.id);
       setEntry({ ...entry, perks: updatedPerks });
