@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import { Perk } from "@/app/database/Models";
 import { getAllPerks } from "@/app/database/DataService";
 import PerkComponent from "./Perk";
@@ -31,24 +31,27 @@ export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelector
       horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.container}
+      contentContainerStyle={styles.perkWrapper}
     >
-      {availablePerks.map((perk) => (
-        <PerkComponent
+        {availablePerks.map((perk) => (
+          <PerkComponent
           key={perk.id}
           perk={perk}
           initialActivity={selectedPerks.some(selected => selected.id === perk.id)}
           onPerkToggle={() => onPerkToggle(perk)}
-        />
-      ))}
+          />
+        ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
     flexDirection: "row",
     paddingVertical: 16,
     paddingLeft: 16,
-  }
+  },
+  perkWrapper: {
+    paddingRight: 16,
+  },
 });

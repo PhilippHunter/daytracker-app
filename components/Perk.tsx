@@ -53,7 +53,7 @@ export default function PerkComponent(props: PerkProps) {
             ? `${props.perk.color}20`
             : isSelected
             ? `${props.perk.color}60`
-            : "",
+            : "transparent",
         },
       ]}
     >

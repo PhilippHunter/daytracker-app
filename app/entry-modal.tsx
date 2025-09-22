@@ -12,7 +12,7 @@ import { Entry, Perk } from "./database/Models";
 import { StyledText } from "../components/StyledText";
 import { placeholderSnippets } from "@/constants/TextSnippets";
 
-export default function ModalScreen() {
+export default function EntryModalScreen() {
   const modalParams = useLocalSearchParams();
   const dayParam = modalParams.selectedDay as string;
   const [entry, setEntry] = useState<Entry>({
@@ -124,6 +124,7 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // alignContent: "space-between",
     paddingBottom: 20,
   },
   perkContainer: {
@@ -135,7 +136,8 @@ const styles = StyleSheet.create({
     flexGrow: 2,
     fontFamily: "Roboto",
     lineHeight: 22,
-    fontSize: 15
+    fontSize: 15,
+    textAlignVertical: "top",
   },
   title: {
     fontSize: 20,
@@ -143,6 +145,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     display: "flex",
+    flexGrow: 0,
     flexDirection: "row",
     padding: 16,
   },

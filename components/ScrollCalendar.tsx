@@ -42,7 +42,7 @@ export default function ScrollCalendar() {
       futureScrollRange={0}
       firstDay={1}
       onDayPress={(day) =>
-        router.push({ pathname: "/modal", params: { selectedDay: day.dateString } })
+        router.push({ pathname: "/entry-modal", params: { selectedDay: day.dateString } })
       }
       theme={{
         todayTextColor: "black",

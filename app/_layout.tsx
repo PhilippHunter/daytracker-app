@@ -86,7 +86,7 @@ function RootLayoutNav() {
             headerBackButtonDisplayMode: "generic"
           }}
         />
-        <Stack.Screen name="modal"
+        <Stack.Screen name="entry-modal"
           options={({ route }) => ({
             presentation: 'modal',
             headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
