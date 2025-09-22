@@ -44,7 +44,6 @@ export default function PerkComponent(props: PerkProps) {
   return (
     <Pressable
       key={props.perk.id}
-      testID={`perk-${props.perk.id}`}
       accessibilityRole="checkbox"
       accessibilityState={{ selected: isSelected}}
       onPress={() => handlePress()}
@@ -65,7 +64,9 @@ export default function PerkComponent(props: PerkProps) {
         size={15}
         color={blendWithBlack(props.perk.color)}
       />
-      <StyledText style={[styles.text, { color: blendWithBlack(props.perk.color) }]}>{props.perk.title.toUpperCase()}</StyledText>
+      <StyledText style={[styles.text, { color: blendWithBlack(props.perk.color) }]}>
+        {props.perk.title.toUpperCase()}
+      </StyledText>
     </Pressable>
   );
 }

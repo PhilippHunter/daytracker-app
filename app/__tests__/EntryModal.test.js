@@ -1,6 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import EntryModalScreen from '../entry-modal';
 
+const { placeholderSnippets } = require('../../constants/TextSnippets');
+
 it(`TextInput inside EntryModalScreen is usable`, async () => {
     // ARRANGE
     // query empty textinput
@@ -13,4 +15,5 @@ it(`TextInput inside EntryModalScreen is usable`, async () => {
 
     // ASSERT
     expect(textInput.props.value).toBe(content);
+    expect(placeholderSnippets).toContain(textInput.props.placeholder);
 });

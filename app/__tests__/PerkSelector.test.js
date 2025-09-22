@@ -1,23 +1,19 @@
 import PerkSelector from '../../components/PerkSelector';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { getAllPerks } from '@/app/database/DataService';
 
 it(`Perks inside PerkSelector are tapable`, async () => {
     // ARRANGE
     // render the UI
-    const mockFunction = jest.fn();
-    const { getByTestId } = render(
+    const mockFunction = jest.fn((prop) => console.log(`${prop.title} tapped`));
+    const { getAllByRole } = render(
         <PerkSelector 
             selectedPerks={[]} 
-            onPerkToggle={mockFunction} 
+            onPerkToggle={(perk) => mockFunction(perk)} 
         />
     );
 
     // access the perk chips
-    const mappedPerks = await getAllPerks();
-    const firstPerkChip = await waitFor(() =>
-        getByTestId(`perk-${mappedPerks[0].id}`)
-    );
+    const firstPerkChip = await waitFor(() => getAllByRole('checkbox')[0]);
 
     // ACT
     // Tap the perk
