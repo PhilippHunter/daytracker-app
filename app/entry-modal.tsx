@@ -7,7 +7,7 @@ import PerkSelector from "@/components/PerkSelector";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
-import { createEntry, deleteEntry, getEntry, updateEntry } from "./database/DataService";
+import { createEntry, deleteEntry, getEntry, updateEntry } from "@/app/database/DataService";
 import { Entry, Perk } from "./database/Models";
 import { StyledText } from "../components/StyledText";
 import { placeholderSnippets } from "@/constants/TextSnippets";

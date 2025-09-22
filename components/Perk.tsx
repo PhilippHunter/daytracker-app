@@ -44,6 +44,9 @@ export default function PerkComponent(props: PerkProps) {
   return (
     <Pressable
       key={props.perk.id}
+      testID={`perk-${props.perk.id}`}
+      accessibilityRole="checkbox"
+      accessibilityState={{ selected: isSelected}}
       onPress={() => handlePress()}
       style={({ pressed }) => [
         styles.chip,
