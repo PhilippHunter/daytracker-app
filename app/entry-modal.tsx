@@ -100,15 +100,15 @@ export default function EntryModalScreen() {
 
       <View style={styles.buttonContainer}>
         {entry.id == -1 ? (
-          <TouchableOpacity onPress={add} style={[styles.button, { flexGrow: 100 }]}>
+          <TouchableOpacity accessibilityRole="button" onPress={add} style={[styles.button, { flexGrow: 100 }]}>
             <StyledText style={styles.buttonText}>Add</StyledText>
           </TouchableOpacity>
         ) : (
           <>
-            <TouchableOpacity onPress={destroy} style={styles.button}>
+            <TouchableOpacity accessibilityRole="button" onPress={destroy} style={styles.button}>
               <Ionicons name="trash" size={15} color="white"></Ionicons>
             </TouchableOpacity>
-            <Pressable onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
+            <Pressable accessibilityRole="button" onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
               <StyledText style={[styles.buttonText]}>Update</StyledText>
             </Pressable>
           </>
