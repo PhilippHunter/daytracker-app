@@ -92,6 +92,7 @@ export default function EntryModalScreen() {
 
       <TextInput
         style={styles.textContainer}
+        testID="entry-modal_text-input"
         multiline={true}
         onChangeText={(text) => setEntry({ ...entry, text: text })}
         value={entry.text}

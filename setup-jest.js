@@ -1,4 +1,4 @@
-console.log('Mock setup geladen!');
+console.log('loading mock setup...');
 
 jest.mock('expo-router', () => {
     const todayString = new Date().toISOString().slice(0, 10);
