@@ -2,8 +2,8 @@ import { CalendarList } from "react-native-calendars";
 import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { toDateId } from "@marceloterreiro/flash-calendar";
-import { getAllEntriesForOverview } from "@/app/database/DataService";
-import { Entry } from "@/app/database/Models";
+import { getAllEntriesForOverview } from "@/database/DataService";
+import { Entry } from "@/database/Models";
 
 export default function ScrollCalendar() {
   const [entries, setEntries] = useState<Array<Omit<Entry, "text">>>([]);

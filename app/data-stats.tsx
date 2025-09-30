@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "@/components/Themed";
-import { getEntryTotalCount, getHighestDayStreak } from "./database/StatsService";
+import { getEntryTotalCount, getHighestDayStreak } from "../database/StatsService";
 import { StyledText } from "@/components/StyledText";
 
 export default function DataStatsScreen() {

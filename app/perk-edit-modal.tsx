@@ -1,7 +1,7 @@
 import { StyledText } from "@/components/StyledText";
 import { useEffect, useState } from "react";
 import { Modal, View, TextInput, Button, StyleSheet } from "react-native";
-import { Perk } from "./database/Models";
+import { Perk } from "../database/Models";
 
 interface PerkEditModalProps {
   editPerk?: Perk,

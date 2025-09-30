@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { initDB } from './database/DataService';
+import { initDB } from '../database/DataService';
 
 export {
   // Catch any errors thrown by the Layout component.

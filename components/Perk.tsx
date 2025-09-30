@@ -1,4 +1,4 @@
-import { Perk } from "@/app/database/Models";
+import { Perk } from "@/database/Models";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet } from "react-native";
 import { StyledText } from "./StyledText";
