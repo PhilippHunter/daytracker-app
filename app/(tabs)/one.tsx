@@ -1,27 +1,41 @@
 import { StyledText } from "@/components/StyledText";
-import { Calendar, toDateId } from "@marceloterreiro/flash-calendar";
-import { useState } from "react";
+import { defaultPerks } from "@/constants/Perks";
+import { entries, Entry, Perk, entryPerks, perks } from "@/database/Schema";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useSQLiteContext } from "expo-sqlite";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import * as schema from '@/database/Schema';
+import { getAllEntries } from "@/database/DataService";
 
-const today = toDateId(new Date());
 
 export default function TabOneScreen() {
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [entries, setEntries] = useState<Entry[]>([]);
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, {schema});
+
+  useEffect(() => {
+    const load = async function () {
+      const entries = await getAllEntries();
+      setEntries(entries);
+    };
+    load();
+  }, [])
 
   return (
-    <View style={{ flex: 1 }}>
-      <StyledText>Selected date: {selectedDate}</StyledText>
-      <Calendar.List
-        calendarActiveDateRanges={[
-          {
-            startId: selectedDate,
-            endId: selectedDate,
-          },
-        ]}
-        calendarMaxDateId={today}
-        calendarInitialMonthId={today}
-        onCalendarDayPress={setSelectedDate}
-      />
+    <View>
+      <View>
+          {entries.map((entry: Entry) => (
+            <View key={entry.id}>
+              <StyledText>{entry.date}</StyledText>
+              <StyledText>{entry.text}</StyledText>
+              {entry.entryPerks.map((perk: Perk) => (
+                <StyledText key={perk.id}>{perk.title}</StyledText>
+              ))}
+            </View>
+          ))}
+      </View>
     </View>
   );
 }

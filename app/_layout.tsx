@@ -3,11 +3,16 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { initDB } from '../database/DataService';
+import { db, initDrizzleDb } from '../database/DataService';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from '@/drizzle/migrations'
+import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { ActivityIndicator } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -51,9 +56,12 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const { success, error } = useMigrations(db, migrations);
+
   useEffect(() => {
-    initDB();
-  }, [])
+    initDrizzleDb();
+  }, [success])
+
 
   const colorScheme = useColorScheme();
   
@@ -62,37 +70,44 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen 
-          name="info" 
-          options={{ 
-            headerBackButtonDisplayMode: "generic",
-            title: ""
-          }} 
-        />
-        <Stack.Screen
-          name="perk-settings"
-          options={{
-            headerTitle: "Perk Customization",
-            headerBackButtonDisplayMode: "generic"
-          }}
-        />
-        <Stack.Screen
-          name="data-stats"
-          options={{
-            headerTitle: "Data Stats",
-            headerBackButtonDisplayMode: "generic"
-          }}
-        />
-        <Stack.Screen name="entry-modal"
-          options={({ route }) => ({
-            presentation: 'modal',
-            headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
-          })}
-        />
-      </Stack>
-    </ThemeProvider>
+    <Suspense fallback={<ActivityIndicator size="large" />}>
+      <SQLiteProvider
+        databaseName={"drizzle-db"}
+        options={{ enableChangeListener: true }}
+        useSuspense>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen 
+              name="info" 
+              options={{ 
+                headerBackButtonDisplayMode: "generic",
+                title: ""
+              }} 
+              />
+            <Stack.Screen
+              name="perk-settings"
+              options={{
+                headerTitle: "Perk Customization",
+                headerBackButtonDisplayMode: "generic"
+              }}
+              />
+            <Stack.Screen
+              name="data-stats"
+              options={{
+                headerTitle: "Data Stats",
+                headerBackButtonDisplayMode: "generic"
+              }}
+              />
+            <Stack.Screen name="entry-modal"
+              options={({ route }) => ({
+                presentation: 'modal',
+                headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
+              })}
+              />
+          </Stack>
+        </ThemeProvider>
+      </SQLiteProvider>
+    </Suspense>
   );
 }
