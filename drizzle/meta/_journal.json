@@ -15,6 +15,13 @@
       "when": 1759330836420,
       "tag": "0001_real_enchantress",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1759779295318,
+      "tag": "0002_lazy_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }

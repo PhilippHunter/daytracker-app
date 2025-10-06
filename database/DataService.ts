@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import AsyncStorage from 'expo-sqlite/kv-store';
-import { Entry, Perk } from "./Schema";
+import { Entry, Perk } from "./Models";
 import { defaultPerks } from "@/constants/Perks";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import * as schema from "./Schema";
@@ -13,6 +13,19 @@ const expoDb = SQLite.openDatabaseSync("drizzle-db");
 export const db = drizzle(expoDb, {schema});
 
 const today = toDateId(new Date());
+const perkRelation: Parameters<typeof db.query.entries.findFirst>[0] = {
+  with: {
+    entryPerks: {
+      columns: {
+        entryId: false,
+        perkId: false,
+      },
+      with: {
+        perk: true
+      }
+    }
+  }
+};
 
 export async function initDrizzleDb() {
   const isInitialized = AsyncStorage.getItemSync("db-initialized");
@@ -122,29 +135,19 @@ export async function initDrizzleDb() {
 // }
 
 // Fetch all entries for calendar view
-export async function getAllEntriesForOverview() {
+export async function getAllEntriesForOverview() : Promise<Omit<Entry, "text">[]> {
   try {
     // Get all entries (without text)
     const result = await db.query.entries.findMany({
+      ...perkRelation,
       columns: {
         id: true,
         date: true,
         text: false
-      }, 
-      with: {
-        entryPerks: {
-          columns: {
-            perkId: false,
-            entryId: false
-          },
-          with: {
-            perk: true
-          }
-        }
       }
     });
 
-    return mapEntryPerks(result);
+    return result.map((entry) => mapEntry(entry));
   } catch (error) {
     console.error("Failed to fetch entries for overview: ", error);
     throw error;
@@ -152,23 +155,10 @@ export async function getAllEntriesForOverview() {
 }
 
 // Fetch all day entries
-export async function getAllEntries() {
+export async function getAllEntries(): Promise<Entry[]> {
   try {
-    const result = await db.query.entries.findMany({
-      with: {
-        entryPerks: {
-          columns: {
-            entryId: false,
-            perkId: false,
-          },
-          with: {
-            perk: true
-          }
-        }
-      }
-    });
-
-    return mapEntryPerks(result);
+    const result = await db.query.entries.findMany(perkRelation);
+    return result.map((entry) => mapEntry(entry));
   } catch (error) {
     console.error("Failed to fetch entries: ", error);
     throw error;
@@ -179,22 +169,12 @@ export async function getAllEntries() {
 export async function getEntry(dateString: string): Promise<Entry | null> {
   try {
     // Fetch the entry by date
-    const entry = db.query.entries.findFirst({
-      with: {
-        entryPerks: {
-          columns: {
-            entryId: false,
-            perkId: false,
-          },
-          with: {
-            perk: true
-          }
-        }
-      },
+    const entry = await db.query.entries.findFirst({
+      ...perkRelation,
       where: eq(entries.date, dateString)
     });
 
-    return mapEntryPerks(entry);
+    return mapEntry(entry);
   } catch(error) {
     console.error(`Failed to fetch Entry with date ${dateString}: `, error);
     throw error;
@@ -206,21 +186,11 @@ async function getEntryById(id: number): Promise<Entry | null> {
   try {
     // Fetch the entry by id
     const entry = db.query.entries.findFirst({
-      with: {
-        entryPerks: {
-          columns: {
-            entryId: false,
-            perkId: false,
-          },
-          with: {
-            perk: true
-          }
-        }
-      },
+      ...perkRelation,
       where: eq(entries.id, id)
     });
 
-    return mapEntryPerks(entry);
+    return mapEntry(entry);
   } catch(error) {
     console.error(`Failed to fetch Entry with id ${id}: `, error);
     throw error;
@@ -386,9 +356,9 @@ export async function resetDB() {
   await db.delete(perks).run();
 }
 
-function mapEntryPerks(inputEntries: any) {
-  return inputEntries.map((entry: any) => ({
-      ...entry,
-      perks: entry.entryPerks.map((ep: any) => ep.perk)
-    }));
+function mapEntry(inputEntry: any): Entry {
+  return {
+    ...inputEntry,
+    perks: inputEntry.entryPerks.map((ep: any) => ep.perk)
+  } as Entry;
 }

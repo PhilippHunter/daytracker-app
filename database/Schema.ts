@@ -14,7 +14,7 @@ export const entriesRelations = relations(entries, ({ many }) => ({
 
 export const perks = sqliteTable('perks', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  title: text('title'),
+  title: text('title').notNull(),
   color: text('color'),
   icon: text('icon'),
 });
@@ -41,6 +41,3 @@ export const entryPerksRelations = relations(entryPerks, ({ one }) => ({
     references: [perks.id]
   })
 }));
-
-export type Entry = typeof entries.$inferSelect;
-export type Perk = typeof perks.$inferSelect;
