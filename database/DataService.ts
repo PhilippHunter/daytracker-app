@@ -185,7 +185,7 @@ export async function getEntry(dateString: string): Promise<Entry | null> {
 async function getEntryById(id: number): Promise<Entry | null> {
   try {
     // Fetch the entry by id
-    const entry = db.query.entries.findFirst({
+    const entry = await db.query.entries.findFirst({
       ...perkRelation,
       where: eq(entries.id, id)
     });
@@ -200,73 +200,73 @@ async function getEntryById(id: number): Promise<Entry | null> {
 // Add a new entry
 // TODO: add perk validation (existence)
 // TODO: add field validation (full Entry field must be provided)
-// export async function createEntry(entry: Entry): Promise<Entry> {
-//   try {
-//     let created: Entry | null = null;   // bridge to return Entry out from the transaction
-//     await db.withTransactionAsync(async () => {
-//       // create statement for entry
-//       const entryResult = await db.runAsync(
-//         `INSERT INTO entries (date, text) VALUES (?, ?);`,
-//         entry.date,
-//         entry.text,
-//       );
-      
-//       // create statement for perk relation
-//       for (const perk of entry.perks) {
-//         await db.runAsync(
-//           `INSERT INTO entry_perks (entry_id, perk_id) VALUES (?, ?);`,
-//           entryResult.lastInsertRowId,
-//           perk.id
-//         );
-//       }
-      
-//       // fetch newly created entry
-//       created = await getEntryById(entryResult.lastInsertRowId);
-//     });
-//     if (!created) {
-//       throw new Error("Failed to create entry.");
-//     }
-//     return created;
-//   } catch (error) {
-//     console.error(`Failed to create Entry with date ${entry.date}: `, error)
-//     throw error;
-//   }
-// }
+export async function createEntry(entry: Entry): Promise<Entry> {
+  try {
+    let insertedEntryId: number | null = null;
+    await db.transaction(async (tx) => {
+      // insert whole entry into entries table
+      const [insertedEntry] = await tx
+        .insert(entries)
+        .values({
+          date: entry.date,
+          text: entry.text
+        })
+        .returning({ id: entries.id });
+
+      // insert entry.perks into entryPerks relation (entry_perks table)
+      if (insertedEntry) {
+        await tx.insert(entryPerks).values(
+          entry.perks.map(perk => ({
+            entryId: insertedEntry.id,
+            perkId: perk.id
+          }))
+        );
+        insertedEntryId = insertedEntry.id;
+      }
+    });
+    
+    if (!insertedEntryId) {
+      throw new Error("Failed to create entry.");
+    }
+
+    // fetch newly created entry outside the transaction
+    const created = await getEntryById(insertedEntryId);
+    if (!created) {
+      throw new Error("Failed to fetch created entry.");
+    }
+    return created;
+  } catch (error) {
+    console.error(`Failed to create Entry with date ${entry.date}: `, error)
+    throw error;
+  }
+}
 
 // Update existing entry
-// export async function updateEntry(entry: Entry): Promise<void> {
-//   try {
-//     await db.withTransactionAsync(async () => {
-//       await db.runAsync(
-//         `UPDATE entries 
-//         SET date = ?, 
-//         text = ?
-//         WHERE id = ?;`,
-//         entry.date,
-//         entry.text,
-//         entry.id
-//       );
-      
-//       // Remove all existing perks for this entry
-//       await db.runAsync(
-//         `DELETE FROM entry_perks WHERE entry_id = ?;`,
-//         entry.id
-//       );
-      
-//       // Insert the new set of perks
-//       for (const perk of entry.perks) {
-//         await db.runAsync(
-//           `INSERT INTO entry_perks (entry_id, perk_id) VALUES (?, ?);`,
-//           entry.id,
-//           perk.id
-//         );
-//       }
-//     });
-//   } catch (error) {
-//     console.error(`Failed to update Entry with date ${entry.date}: `, error)
-//     throw error;
-//   }
-// }
+export async function updateEntry(entry: Entry): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      // update entry
+      await tx.update(entries).set({
+        date: entry.date,
+        text: entry.text,
+      }).where(eq(entries.id, entry.id));
+    
+      // delete related perks
+      await tx.delete(entryPerks).where(eq(entryPerks.entryId, entry.id));
+
+      // re-add related perks
+      await tx.insert(entryPerks).values(
+        entry.perks.map(perk => ({
+          entryId: entry.id,
+          perkId: perk.id
+        }))
+      );
+    });
+  } catch (error) {
+    console.error(`Failed to update Entry with date ${entry.date}: `, error)
+    throw error;
+  }
+}
 
 // Delete existing entry
 export async function deleteEntry(entry: Entry): Promise<void> {
@@ -357,6 +357,8 @@ export async function resetDB() {
 }
 
 function mapEntry(inputEntry: any): Entry {
+  if (!inputEntry) return inputEntry;
+
   return {
     ...inputEntry,
     perks: inputEntry.entryPerks.map((ep: any) => ep.perk)
