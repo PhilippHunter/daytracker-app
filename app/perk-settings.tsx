@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text } from "@/components/Themed";
 import { Perk } from "../database/Models";
-import { createPerk, deletePerk, getAllPerks, updateEntry, updatePerk } from "@/database/DataService";
+import { createPerk, deletePerk, getAllPerks, updatePerk } from "@/database/PerkService";
 import PerkEditModal from "./perk-edit-modal";
 import PerkComponent from "@/components/Perk";
 import { useFocusEffect } from "expo-router";

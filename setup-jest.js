@@ -8,7 +8,13 @@ jest.mock('expo-router', () => {
     }
 });
 
-jest.mock('@/app/database/DataService', () => {
+jest.mock('@/app/database/EntryService', () => {
+    return {
+        getEntry: jest.fn(() => Promise.resolve(null))
+    }
+});
+
+jest.mock('@/app/database/PerkService', () => {
     const { defaultPerks } = require('./constants/Perks');
     const mappedPerks = defaultPerks.map((perk, idx) => ({
         ...perk,
@@ -16,6 +22,5 @@ jest.mock('@/app/database/DataService', () => {
     }));
     return {
         getAllPerks: jest.fn(() => Promise.resolve(mappedPerks)),
-        getEntry: jest.fn(() => Promise.resolve(null))
     }
 });

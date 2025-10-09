@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView, View } from "react-native";
 import { Perk } from "@/database/Models";
-import { getAllPerks } from "@/database/DataService";
+import { getAllPerks } from "@/database/PerkService";
 import PerkComponent from "./Perk";
 
 interface PerkSelectorProps {

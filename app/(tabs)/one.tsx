@@ -1,12 +1,12 @@
 import { StyledText } from "@/components/StyledText";
 import { defaultPerks } from "@/constants/Perks";
-import { entries, Entry, Perk, entryPerks, perks } from "@/database/Schema";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import * as schema from '@/database/Schema';
-import { getAllEntries } from "@/database/DataService";
+import { getAllEntries } from "@/database/EntryService";
+import { Entry, Perk } from "@/database/Models";
 
 
 export default function TabOneScreen() {

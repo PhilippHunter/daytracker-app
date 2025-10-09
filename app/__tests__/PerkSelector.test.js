@@ -1,7 +1,7 @@
 import { defaultPerks } from '@/constants/Perks';
 import PerkSelector from '../../components/PerkSelector';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { getAllPerks } from '@/database/DataService';
+import { getAllPerks } from '@/database/EntryService';
 import { experimental_LayoutConformance } from 'react-native';
 
 it(`Perks inside PerkSelector are selectable`, async () => {

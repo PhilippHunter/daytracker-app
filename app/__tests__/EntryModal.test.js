@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor, screen } from '@testing-library/react-native';
-import { getAllPerks } from '@/app/database/DataService';
+import { getAllPerks } from '@/app/database/EntryService';
 import EntryModalScreen from '../entry-modal';
 
 const { placeholderSnippets } = require('../../constants/TextSnippets');
@@ -46,7 +46,7 @@ it('EntryModalScreen displays loaded data correctly', async () => {
         text: "Dies ist ein Testeintrag",
         perks: [allPerks[0], allPerks[1]] 
     };
-    require('@/app/database/DataService').getEntry.mockResolvedValueOnce(mockEntry);
+    require('@/app/database/EntryService').getEntry.mockResolvedValueOnce(mockEntry);
     
     // ACT
     const { getByRole, getByTestId } = render(<EntryModalScreen />);
