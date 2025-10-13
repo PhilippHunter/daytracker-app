@@ -7,6 +7,7 @@ import { Text, View } from "react-native";
 import * as schema from '@/database/Schema';
 import { getAllEntries } from "@/database/EntryService";
 import { Entry, Perk } from "@/database/Models";
+import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 
 
 export default function TabOneScreen() {
@@ -14,6 +15,7 @@ export default function TabOneScreen() {
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, {schema});
+  useDrizzleStudio(expoDb);
 
   useEffect(() => {
     const load = async function () {
@@ -30,9 +32,9 @@ export default function TabOneScreen() {
             <View key={entry.id}>
               <StyledText>{entry.date}</StyledText>
               <StyledText>{entry.text}</StyledText>
-              {entry.entryPerks.map((perk: Perk) => (
+              {/* {entry.entryPerks.map((perk: Perk) => (
                 <StyledText key={perk.id}>{perk.title}</StyledText>
-              ))}
+              ))} */}
             </View>
           ))}
       </View>

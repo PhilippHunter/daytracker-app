@@ -3,6 +3,7 @@ export interface Entry {
   date: string;
   text: string | null;
   perks: Perk[];
+  mentions: Person[] | null;
 }
 
 export interface Perk {
@@ -10,4 +11,9 @@ export interface Perk {
   title: string;
   color: string | null;
   icon: string | null;
+}
+
+export interface Person {
+  id: number,
+  name: string
 }

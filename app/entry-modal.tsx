@@ -11,6 +11,7 @@ import { createEntry, deleteEntry, getEntry, updateEntry } from "@/database/Entr
 import { Entry, Perk } from "../database/Models";
 import { StyledText } from "../components/StyledText";
 import { placeholderSnippets } from "@/constants/TextSnippets";
+import { saveEntryWithMentions } from "@/database/EntryPipeline";
 
 export default function EntryModalScreen() {
   const modalParams = useLocalSearchParams();
@@ -20,6 +21,7 @@ export default function EntryModalScreen() {
     date: dayParam,
     text: "",
     perks: [],
+    mentions: null
   });
 
   useEffect(() => {
@@ -46,21 +48,21 @@ export default function EntryModalScreen() {
   async function add() {
     try {
       console.log("adding entry");
-      const newEntry = await createEntry(entry);
+      const newEntry = await saveEntryWithMentions(entry);
       setEntry(newEntry);
     } catch (error) {
       // Show error msg
-      console.log('failed...');
+      console.log(error);
     }
   }
   
   async function update() {
     try {
       console.log("updating entry");
-      await updateEntry(entry);
+      await saveEntryWithMentions(entry);
     } catch (error) {
       // Show error msg
-      console.log('failed...');
+      console.log(error);
     }
   }
 
@@ -71,7 +73,7 @@ export default function EntryModalScreen() {
       router.dismiss();
     } catch (error) {
       // Show error msg
-      console.log('failed...');
+      console.log(error);
     }
   }
 

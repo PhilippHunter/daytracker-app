@@ -1,17 +1,34 @@
-// import { createEntry } from "./EntryService";
-// import { Entry } from "./Models";
+import { createEntry, updateEntry } from "./EntryService";
+import { saveMentionsToEntry } from "./MentionService";
+import { Entry } from "./Models";
 
 
-// export async function saveEntryWithMentions(entry: Entry): Entry {
+// creates or updates Entry with handling Mentions
+export async function saveEntryWithMentions(entry: Entry): Promise<Entry> {
+    if (entry.id == -1) {
+        const newEntry = await createEntry(entry);
+        entry = newEntry;
+    } else {   
+        await updateEntry(entry);
+    }
 
-//     const mentionNames = extractMentions(entry.text);
+    if (entry.text) {
+        const uniqueMentionNames = extractUniqueMentions(entry.text);   
+        await saveMentionsToEntry(uniqueMentionNames, entry);
+    }
 
-//     const newEntry = await createEntry(entry);
-    
-//     return;
-// }
+    return entry;
+}
 
-// function extractMentions(text: string): string[] {
-//     // extract logic
-//     return []
-// }
+function extractUniqueMentions(text: string): string[] {
+    const result: string[] = [];
+    for (const word of text.split(/\s+/)) {
+        if (word.startsWith('@')) {
+            const extractedWord = word.substring(1);
+            if (!result.includes(extractedWord)) {
+                result.push(extractedWord);
+            }
+        }
+    }
+    return result;
+}

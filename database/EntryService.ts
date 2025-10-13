@@ -3,7 +3,7 @@ import { Entry } from "./Models";
 import { entries, entryPerks } from './Schema';
 import { eq } from "drizzle-orm";
 
-const perkRelation: Parameters<typeof db.query.entries.findFirst>[0] = {
+const relations: Parameters<typeof db.query.entries.findFirst>[0] = {
   with: {
     entryPerks: {
       columns: {
@@ -12,6 +12,15 @@ const perkRelation: Parameters<typeof db.query.entries.findFirst>[0] = {
       },
       with: {
         perk: true
+      }
+    },
+    entryPersons: {
+      columns: {
+        entryId: false,
+        personId: false
+      },
+      with: {
+        person: true
       }
     }
   }
@@ -23,7 +32,7 @@ export async function getAllEntriesForOverview() : Promise<Omit<Entry, "text">[]
   try {
     // Get all entries (without text)
     const result = await db.query.entries.findMany({
-      ...perkRelation,
+      ...relations,
       columns: {
         id: true,
         date: true,
@@ -41,7 +50,7 @@ export async function getAllEntriesForOverview() : Promise<Omit<Entry, "text">[]
 // Fetch all day entries
 export async function getAllEntries(): Promise<Entry[]> {
   try {
-    const result = await db.query.entries.findMany(perkRelation);
+    const result = await db.query.entries.findMany(relations);
     return result.map((entry) => mapEntry(entry));
   } catch (error) {
     console.error("Failed to fetch entries: ", error);
@@ -54,7 +63,7 @@ export async function getEntry(dateString: string): Promise<Entry | null> {
   try {
     // Fetch the entry by date
     const entry = await db.query.entries.findFirst({
-      ...perkRelation,
+      ...relations,
       where: eq(entries.date, dateString)
     });
 
@@ -70,7 +79,7 @@ async function getEntryById(id: number): Promise<Entry | null> {
   try {
     // Fetch the entry by id
     const entry = await db.query.entries.findFirst({
-      ...perkRelation,
+      ...relations,
       where: eq(entries.id, id)
     });
 
@@ -166,6 +175,7 @@ function mapEntry(inputEntry: any): Entry {
 
   return {
     ...inputEntry,
-    perks: inputEntry.entryPerks.map((ep: any) => ep.perk)
+    perks: inputEntry.entryPerks.map((ep: any) => ep.perk),
+    mentions: inputEntry.entryPersons.map((ep: any) => ep.person)
   } as Entry;
 }
