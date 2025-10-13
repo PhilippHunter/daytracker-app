@@ -10,12 +10,18 @@ import { useEffect } from "react";
 import { createEntry, deleteEntry, getEntry, updateEntry } from "@/database/EntryService";
 import { Entry, Perk } from "../database/Models";
 import { StyledText } from "../components/StyledText";
-import { placeholderSnippets } from "@/constants/TextSnippets";
 import { saveEntryWithMentions } from "@/database/EntryPipeline";
+import { EntryTextInput } from "@/components/EntryTextInput";
+
+// IDEE:
+// mentions lazy nachladen
+// eingabe von @ triggert laden von allen personen (oder @p allen mit p)
+// so direktes anzeigen der direkten Person möglich (kleines Bildchen und spezifizierte Farbe)
 
 export default function EntryModalScreen() {
   const modalParams = useLocalSearchParams();
   const dayParam = modalParams.selectedDay as string;
+  const [entryText, setEntryText] = useState<string>("");
   const [entry, setEntry] = useState<Entry>({
     id: -1,
     date: dayParam,
@@ -29,6 +35,7 @@ export default function EntryModalScreen() {
       if (fetchedEntry) {
         console.log("Eintrag: ", fetchedEntry);
         setEntry(fetchedEntry);
+        setEntryText(fetchedEntry.text);
       }
     });
   }, [dayParam]);
@@ -48,8 +55,10 @@ export default function EntryModalScreen() {
   async function add() {
     try {
       console.log("adding entry");
+      entry.text = entryText;
       const newEntry = await saveEntryWithMentions(entry);
       setEntry(newEntry);
+      setEntryText(newEntry.text);
     } catch (error) {
       // Show error msg
       console.log(error);
@@ -59,6 +68,7 @@ export default function EntryModalScreen() {
   async function update() {
     try {
       console.log("updating entry");
+      entry.text = entryText;
       await saveEntryWithMentions(entry);
     } catch (error) {
       // Show error msg
@@ -69,6 +79,7 @@ export default function EntryModalScreen() {
   async function destroy() {
     try {
       console.log("deleting entry");
+      entry.text = entryText;
       await deleteEntry(entry);
       router.dismiss();
     } catch (error) {
@@ -92,14 +103,7 @@ export default function EntryModalScreen() {
         darkColor="rgba(255,255,255,0.1)"
       />
 
-      <TextInput
-        style={styles.textContainer}
-        testID="entry-modal_text-input"
-        multiline={true}
-        onChangeText={(text) => setEntry({ ...entry, text: text })}
-        value={entry.text}
-        placeholder={placeholderSnippets[Math.floor(Math.random() * placeholderSnippets.length)]}
-      />
+      <EntryTextInput value={entryText} onChange={setEntryText} />
 
       <View style={styles.buttonContainer}>
         {entry.id == -1 ? (
@@ -132,15 +136,6 @@ const styles = StyleSheet.create({
   },
   perkContainer: {
     flexGrow: 0,
-  },
-  textContainer: {
-    padding: 16,
-    marginBottom: 40,
-    flexGrow: 2,
-    fontFamily: "Roboto",
-    lineHeight: 22,
-    fontSize: 15,
-    textAlignVertical: "top",
   },
   title: {
     fontSize: 20,

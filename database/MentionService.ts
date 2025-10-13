@@ -3,6 +3,11 @@ import { db } from "./DataService";
 import { Entry, Person } from "./Models";
 import { entryPersons, persons } from "./Schema";
 
+// get all persons for mention suggestions
+export async function getAllPersons(): Promise<Person[]> {
+    return await db.query.persons.findMany();
+}
+
 // get all mentions for specific person
 
 // get all mentions for specific entry
