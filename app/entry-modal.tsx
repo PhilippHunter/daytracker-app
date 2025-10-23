@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { Platform, Pressable, StyleSheet, TextInput, TouchableOpacity } from "react-native";
-
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { Text, View } from "@/components/Themed";
 import React, { useState } from "react";
 import PerkSelector from "@/components/PerkSelector";
@@ -12,6 +12,7 @@ import { Entry, Perk } from "../database/Models";
 import { StyledText } from "../components/StyledText";
 import { saveEntryWithMentions } from "@/database/EntryPipeline";
 import { EntryTextInput } from "@/components/EntryTextInput";
+import { useFullScreenModalHeaderHeight } from "@/components/useFullScreenModalHeaderHeight";
 
 // IDEE:
 // mentions lazy nachladen
@@ -29,6 +30,7 @@ export default function EntryModalScreen() {
     perks: [],
     mentions: null
   });
+  const headerHeight = useFullScreenModalHeaderHeight();
 
   useEffect(() => {
     getEntry(dayParam).then((fetchedEntry) => {
@@ -89,7 +91,11 @@ export default function EntryModalScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior="padding" 
+      keyboardVerticalOffset={headerHeight}
+    >
       <View style={styles.perkContainer}>
         <PerkSelector
           selectedPerks={entry.perks}
@@ -105,47 +111,45 @@ export default function EntryModalScreen() {
 
       <EntryTextInput value={entryText} onChange={setEntryText} />
 
-      <View style={styles.buttonContainer}>
-        {entry.id == -1 ? (
-          <TouchableOpacity accessibilityRole="button" onPress={add} style={[styles.button, { flexGrow: 100 }]}>
-            <StyledText style={styles.buttonText}>Add</StyledText>
-          </TouchableOpacity>
-        ) : (
-          <>
-            <TouchableOpacity accessibilityRole="button" onPress={destroy} style={styles.button}>
-              <Ionicons name="trash" size={15} color="white"></Ionicons>
+        <View style={styles.buttonContainer}>
+          {entry.id == -1 ? (
+            <TouchableOpacity accessibilityRole="button" onPress={add} style={[styles.button, { flexGrow: 100 }]}>
+              <StyledText style={styles.buttonText}>Add</StyledText>
             </TouchableOpacity>
-            <Pressable accessibilityRole="button" onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
-              <StyledText style={[styles.buttonText]}>Update</StyledText>
-            </Pressable>
-          </>
-        )}
-      </View>
+          ) : (
+            <>
+              <TouchableOpacity accessibilityRole="button" onPress={destroy} style={styles.button}>
+                <Ionicons name="trash" size={15} color="white"></Ionicons>
+              </TouchableOpacity>
+              <Pressable accessibilityRole="button" onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
+                <StyledText style={[styles.buttonText]}>Update</StyledText>
+              </Pressable>
+            </>
+          )}
+        </View>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignContent: "space-between",
-    paddingBottom: 20,
+    backgroundColor: "white",
   },
   perkContainer: {
-    flexGrow: 0,
+    flexShrink: 0,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
   },
   buttonContainer: {
-    display: "flex",
-    flexGrow: 0,
+    flexShrink: 0,
     flexDirection: "row",
-    padding: 16,
+    padding: 20,
   },
   button: {
     gap: 5,

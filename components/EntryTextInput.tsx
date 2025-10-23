@@ -103,10 +103,9 @@ export function EntryTextInput({ value, onChange }: EntryTextInputProps) {
 }
 
 const styles = StyleSheet.create({
-    textContainer: {
+  textContainer: {
     padding: 16,
-    marginBottom: 40,
-    flexGrow: 2,
+    flex: 1,
     fontFamily: "Roboto",
     lineHeight: 22,
     fontSize: 15,

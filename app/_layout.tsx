@@ -10,9 +10,9 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { db, initDrizzleDb } from '../database/DataService';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations'
-import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { SQLiteProvider } from 'expo-sqlite';
 import { ActivityIndicator } from 'react-native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -76,36 +76,38 @@ function RootLayoutNav() {
         options={{ enableChangeListener: true }}
         useSuspense>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen 
-              name="info" 
-              options={{ 
-                headerBackButtonDisplayMode: "generic",
-                title: ""
-              }} 
-              />
-            <Stack.Screen
-              name="perk-settings"
-              options={{
-                headerTitle: "Perk Customization",
-                headerBackButtonDisplayMode: "generic"
-              }}
-              />
-            <Stack.Screen
-              name="data-stats"
-              options={{
-                headerTitle: "Data Stats",
-                headerBackButtonDisplayMode: "generic"
-              }}
-              />
-            <Stack.Screen name="entry-modal"
-              options={({ route }) => ({
-                presentation: 'modal',
-                headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
-              })}
-              />
-          </Stack>
+          <KeyboardProvider>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen 
+                name="info" 
+                options={{ 
+                  headerBackButtonDisplayMode: "generic",
+                  title: ""
+                }} 
+                />
+              <Stack.Screen
+                name="perk-settings"
+                options={{
+                  headerTitle: "Perk Customization",
+                  headerBackButtonDisplayMode: "generic"
+                }}
+                />
+              <Stack.Screen
+                name="data-stats"
+                options={{
+                  headerTitle: "Data Stats",
+                  headerBackButtonDisplayMode: "generic"
+                }}
+                />
+              <Stack.Screen name="entry-modal"
+                options={({ route }) => ({
+                  presentation: 'modal',
+                  headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
+                })}
+                />
+            </Stack>
+          </KeyboardProvider>
         </ThemeProvider>
       </SQLiteProvider>
     </Suspense>
