@@ -4,13 +4,12 @@ import { defaultPerks } from "@/constants/Perks";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import * as schema from "./Schema";
 import { perks, entries, entryPerks } from './Schema';
-import { toDateId } from "@marceloterreiro/flash-calendar";
 
 // export const db = SQLite.openDatabaseSync("daytracker.db");
 const expoDb = SQLite.openDatabaseSync("drizzle-db");
 export const db = drizzle(expoDb, {schema});
 
-const today = toDateId(new Date());
+const today = new Date().toISOString().substring(0,10);
 
 export async function initDrizzleDb() {
   const isInitialized = AsyncStorage.getItemSync("db-initialized");

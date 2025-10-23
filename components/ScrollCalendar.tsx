@@ -1,7 +1,6 @@
 import { CalendarList } from "react-native-calendars";
 import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { toDateId } from "@marceloterreiro/flash-calendar";
 import { getAllEntriesForOverview } from "@/database/EntryService";
 import { Entry } from "@/database/Models";
 
@@ -9,7 +8,7 @@ export default function ScrollCalendar() {
   const [entries, setEntries] = useState<Array<Omit<Entry, "text">>>([]);
 
   // Calendar props
-  const today = toDateId(new Date());
+  const today = new Date().toISOString().substring(0,10);
   const markedDates = Object.fromEntries(
     entries.map((entry) => {
       return [entry.date, { dots: entry.perks }];
