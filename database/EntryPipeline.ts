@@ -25,7 +25,7 @@ function extractUniqueMentions(text: string): string[] {
     for (const word of text.split(/\s+/)) {
         if (word.startsWith('@')) {
             const extractedWord = word.substring(1);
-            if (!result.includes(extractedWord)) {
+            if (extractedWord && !result.includes(extractedWord)) {
                 result.push(extractedWord);
             }
         }

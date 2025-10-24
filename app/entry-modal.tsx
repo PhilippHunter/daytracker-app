@@ -114,7 +114,7 @@ export default function EntryModalScreen() {
         <View style={styles.buttonContainer}>
           {entry.id == -1 ? (
             <TouchableOpacity accessibilityRole="button" onPress={add} style={[styles.button, { flexGrow: 100 }]}>
-              <StyledText style={styles.buttonText}>Add</StyledText>
+              <Ionicons name="add-outline" size={20} color="white"></Ionicons>
             </TouchableOpacity>
           ) : (
             <>
@@ -122,7 +122,7 @@ export default function EntryModalScreen() {
                 <Ionicons name="trash" size={15} color="white"></Ionicons>
               </TouchableOpacity>
               <Pressable accessibilityRole="button" onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
-                <StyledText style={[styles.buttonText]}>Update</StyledText>
+                <Ionicons name="checkmark" size={15} color="white"></Ionicons>
               </Pressable>
             </>
           )}

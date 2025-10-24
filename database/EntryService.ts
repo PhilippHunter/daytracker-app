@@ -107,15 +107,15 @@ export async function createEntry(entry: Entry): Promise<Entry> {
         .returning({ id: entries.id });
 
       // insert entry.perks into entryPerks relation (entry_perks table)
-      if (insertedEntry) {
+      if (insertedEntry && entry.perks && entry.perks.length != 0) {
         await tx.insert(entryPerks).values(
           entry.perks.map(perk => ({
             entryId: insertedEntry.id,
             perkId: perk.id
           }))
         );
-        insertedEntryId = insertedEntry.id;
       }
+      insertedEntryId = insertedEntry.id;
     });
     if (!insertedEntryId) {
       throw new Error("Failed to create entry.");
@@ -147,12 +147,14 @@ export async function updateEntry(entry: Entry): Promise<void> {
       await tx.delete(entryPerks).where(eq(entryPerks.entryId, entry.id));
 
       // re-add related perks
-      await tx.insert(entryPerks).values(
-        entry.perks.map(perk => ({
-          entryId: entry.id,
-          perkId: perk.id
-        }))
-      );
+      if (entry.perks && entry.perks.length != 0) {
+        await tx.insert(entryPerks).values(
+          entry.perks.map(perk => ({
+            entryId: entry.id,
+            perkId: perk.id
+          }))
+        );
+      }
     });
   } catch (error) {
     console.error(`Failed to update Entry with date ${entry.date}: `, error)

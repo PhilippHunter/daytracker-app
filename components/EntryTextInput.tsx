@@ -16,16 +16,7 @@ const triggersConfig: TriggersConfig<'mention'> = {
   },
 };
 
-interface SuggestionsProps extends SuggestionsProvidedProps {
-  inputLayout: {
-    x: number,
-    y: number,
-    height: number,
-    width: number
-  }
-}
-
-export function Suggestions({keyword, onSelect, inputLayout}: SuggestionsProps) {
+export function Suggestions({keyword, onSelect}: SuggestionsProvidedProps) {
   const [suggestions, setSuggestions] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
@@ -37,7 +28,7 @@ export function Suggestions({keyword, onSelect, inputLayout}: SuggestionsProps) 
     )));
   }, []);
 
-  if (keyword == null) {
+  if (keyword == null || /\s/.test(keyword)) {
     return null;
   }
 
@@ -49,7 +40,7 @@ export function Suggestions({keyword, onSelect, inputLayout}: SuggestionsProps) 
         top: 0,
         left: 0,
         width: '100%',
-        backgroundColor: 'white'
+        backgroundColor: "rgba(236, 255, 231, 1)"
       })} 
       contentContainerStyle={styles.suggestionContainer}
     >
@@ -71,33 +62,27 @@ interface EntryTextInputProps {
 }
 
 export function EntryTextInput({ value, onChange }: EntryTextInputProps) {
-  const [inputLayout, setInputLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const { textInputProps, triggers } = useMentions({
     value: value,
     onChange: onChange,
     triggersConfig
   });
 
-  function handleInputLayout(event: LayoutChangeEvent) {
-    setInputLayout(event.nativeEvent.layout);
-  }
 
   return (
     <>
       <Suggestions
-        inputLayout={inputLayout}
         {...triggers.mention}
         // onSelect={() => console.log("mention clicked")}
-        /> 
+      />
 
       <TextInput
         style={styles.textContainer}
         testID="entry-modal_text-input"
         multiline={true}
         placeholder={placeholderSnippets[Math.floor(Math.random() * placeholderSnippets.length)]}
-        onLayout={handleInputLayout}
         {...textInputProps}
-        />
+      />
     </>
   );
 }
@@ -113,16 +98,23 @@ const styles = StyleSheet.create({
   },
   suggestionContainer: {
     flexDirection: "row",
+    paddingVertical: 16,
     paddingLeft: 16,
-    padding: 12
   },
   suggestionWrapper: {
     paddingRight: 16,
   },
   suggestionChip: {
-    padding: 12, 
-    backgroundColor: 'lightgreen',
+    backgroundColor: "rgba(66,255,37,0.19)",
+    flexDirection: "row",
+    gap: 5,
+    borderWidth: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
     borderRadius: 50,
-    marginRight: 12,
+    borderColor: "rgba(66,255,37,0.3)",
+    marginRight: 10,
+    alignItems: "center",
+    justifyContent: "center",
   }
 });
