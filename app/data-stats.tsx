@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "@/components/Themed";
-import { getEntryTotalCount, getHighestDayStreak } from "../database/StatsService";
+import { getClosestFriend, getEntryTotalCount, getHighestDayStreak } from "../database/StatsService";
 import { StyledText } from "@/components/StyledText";
+import { Person } from "@/database/Models";
 
 export default function DataStatsScreen() {
   const [totalEntries, setTotalEntries] = useState<number>(0);
   const [highestDayStreak, setHighestDayStreak] = useState<number>(0);
+  const [closestFriend, setClosestFriend] = useState<Person>();
 
   useEffect(() => {
     getEntryTotalCount().then(setTotalEntries);
     getHighestDayStreak().then(setHighestDayStreak);
+    getClosestFriend().then((friend) => {
+      if (friend) {
+        setClosestFriend(friend);
+      }
+    });
   }, []);
 
   return (
@@ -22,11 +29,15 @@ export default function DataStatsScreen() {
       </View>
       {/* Separator */}
       <View style={styles.separator} />
-      {/* Future stats go here */}
       <View style={styles.statRow}>
         <StyledText style={styles.statNumber}>{highestDayStreak}</StyledText>
         <StyledText style={styles.statLabel}>Highest Day Streak</StyledText>
       </View>
+      <View style={styles.statRow}>
+        <StyledText style={styles.statNumber}>{closestFriend?.name}</StyledText>
+        <StyledText style={styles.statLabel}>Closest Friend</StyledText>
+      </View>
+      {/* Future stats go here */}
     </View>
   );
 }

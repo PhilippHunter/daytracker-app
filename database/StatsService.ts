@@ -1,30 +1,57 @@
 import * as SQLite from "expo-sqlite";
-import { Entry, Perk } from "./Models";
+import { Entry, Perk, Person } from "./Models";
 import { defaultPerks } from "@/constants/Perks";
 import { db } from "./DataService";
+import { entries, entryPersons, persons } from "./Schema";
+import { asc, count, countDistinct, desc, eq } from "drizzle-orm";
 
 export async function getEntryTotalCount() {
   try {
-    const result = await db.getAllAsync<{ count: number }>(
-      `SELECT COUNT(*) as count FROM entries;`
-    );
+    const result = await db.query.entries.findMany();
 
-    return result[0]?.count;
+    return result.length;
   } catch (error) {
     console.log("Fetching entry count failed: ", error);
     throw error;
   }
 }
 
+// TODO: Test this
 export async function getHighestDayStreak(): Promise<number> {
   try {
-    const result = await db.getAllAsync<{ date: string }>(
-      `SELECT date FROM entries ORDER BY date ASC;`
-    );
+    const result = await db.query.entries.findMany({
+      orderBy: [asc(entries.date)]
+    });
     const entryDates = result.map(row => new Date(row.date));
     return calcHighestDayStreak(entryDates);
   } catch (error) {
     console.log("Fetching highest day streak failed: ", error);
+    throw error;
+  }
+}
+
+export async function getClosestFriend(): Promise<Person | null> {
+  try {
+    let closestFriend = null;
+    await db.transaction(async (tx) => {
+      const result = await tx.select({ 
+        id: entryPersons.personId, 
+        count: count(entryPersons.personId)
+      }).from(entryPersons)
+        .groupBy(entryPersons.personId)
+        .orderBy(({ count }) => desc(count));
+      console.log(result);
+
+      if (result.length != 0 && result[0].id) {
+        closestFriend = await tx.query.persons.findFirst({
+          where: eq(persons.id, result[0].id)
+        })
+      }
+    });
+
+    return closestFriend ?? null;
+  } catch (error) {
+    console.log("Fetching closest friend failed: ", error);
     throw error;
   }
 }
