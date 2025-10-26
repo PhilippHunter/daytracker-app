@@ -11,7 +11,9 @@ export default function ScrollCalendar() {
   const today = new Date().toISOString().substring(0,10);
   const markedDates = Object.fromEntries(
     entries.map((entry) => {
-      return [entry.date, { dots: entry.perks }];
+      return [entry.date, { 
+        dots: entry.perks.length != 0 ? entry.perks : [{color: "#000"}],
+      }];
     })
   );
 

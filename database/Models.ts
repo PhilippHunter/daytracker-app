@@ -9,7 +9,7 @@ export interface Entry {
 export interface Perk {
   id: number;
   title: string;
-  color: string | null;
+  color: string;
   icon: string | null;
 }
 
