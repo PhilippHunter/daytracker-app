@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "./DataService";
 import { Entry, Person } from "./Models";
-import { entryPersons, persons } from "./Schema";
+import { entries, entryPersons, persons } from "./Schema";
 
 // get all persons for mention suggestions
 export async function getAllPersons(): Promise<Person[]> {
@@ -17,10 +17,10 @@ export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: E
     // remove existing mentions if any
     await db.delete(entryPersons).where(eq(entryPersons.entryId, entry.id));
 
-    if (uniqueMentionNames.length == 0) return;
+    if (uniqueMentionNames.length == 0 || !entry.text) return;
 
     // find unique linked persons
-    const linkedPersons: Person[] = []
+    const linkedPersons: Person[] = [];
     for (const mentionName of uniqueMentionNames) {
         let personToLink = await db.query.persons.findFirst({
             where: eq(persons.name, mentionName)
@@ -42,4 +42,15 @@ export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: E
         entryId: entry.id,
         personId: person.id
     })));
+
+    // re-parse linked persons in entry text to make them appear formatted
+    for (const linkedPerson of linkedPersons) {
+        entry.text = entry.text?.replaceAll(
+            `@${linkedPerson.name}`, 
+            `{@}[${linkedPerson.name}](${linkedPerson.id})`
+        );
+    }
+    await db.update(entries).set({
+        text: entry.text
+    }).where(eq(entries.id, entry.id));
 }

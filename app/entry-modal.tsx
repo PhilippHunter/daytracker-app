@@ -13,6 +13,7 @@ import { StyledText } from "../components/StyledText";
 import { saveEntryWithMentions } from "@/database/EntryPipeline";
 import { EntryTextInput } from "@/components/EntryTextInput";
 import { useFullScreenModalHeaderHeight } from "@/components/useFullScreenModalHeaderHeight";
+import { replaceTriggerValues } from "react-native-controlled-mentions";
 
 // IDEE:
 // mentions lazy nachladen
@@ -57,7 +58,7 @@ export default function EntryModalScreen() {
   async function add() {
     try {
       console.log("adding entry");
-      entry.text = entryText;
+      entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
       const newEntry = await saveEntryWithMentions(entry);
       setEntry(newEntry);
       setEntryText(newEntry.text);
@@ -70,7 +71,7 @@ export default function EntryModalScreen() {
   async function update() {
     try {
       console.log("updating entry");
-      entry.text = entryText;
+      entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
       await saveEntryWithMentions(entry);
     } catch (error) {
       // Show error msg

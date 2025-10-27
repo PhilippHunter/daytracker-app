@@ -35,13 +35,13 @@ export function Suggestions({keyword, onSelect}: SuggestionsProvidedProps) {
   return (
     <ScrollView 
       horizontal 
-      style={(styles.suggestionContainer, {
+      style={{
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         backgroundColor: "rgba(236, 255, 231, 1)"
-      })} 
+      }} 
       contentContainerStyle={styles.suggestionContainer}
     >
       {suggestions
@@ -100,9 +100,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 16,
     paddingLeft: 16,
-  },
-  suggestionWrapper: {
-    paddingRight: 16,
+    height: 73,
   },
   suggestionChip: {
     backgroundColor: "rgba(66,255,37,0.19)",
