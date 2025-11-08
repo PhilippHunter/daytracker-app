@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { asc, desc, eq, max } from "drizzle-orm";
 import { db } from "./DataService";
 import { Entry, Person } from "./Models";
 import { entries, entryPersons, persons } from "./Schema";
@@ -6,6 +6,21 @@ import { entries, entryPersons, persons } from "./Schema";
 // get all persons for mention suggestions
 export async function getAllPersons(): Promise<Person[]> {
     return await db.query.persons.findMany();
+}
+
+// get all persons sorted by last mention
+export async function getAllPersonsSorted(): Promise<Person[]> {
+    return await db
+        .select({
+            id: persons.id,
+            name: persons.name,
+            lastMention: max(entries.date)
+        })
+        .from(persons)
+        .leftJoin(entryPersons, eq(persons.id, entryPersons.personId))
+        .leftJoin(entries, eq(entryPersons.entryId, entries.id))
+        .groupBy(persons.id)
+        .orderBy(desc(entries.date))
 }
 
 // get all mentions for specific person

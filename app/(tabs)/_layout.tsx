@@ -48,9 +48,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="friends"
+        options={{
+          title: 'Friends',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />
+        }}
+      />
+      <Tabs.Screen
         name="one"
         options={{
-          title: 'Tab One',
+          title: 'Debug',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Link href="/entry-modal" asChild>
