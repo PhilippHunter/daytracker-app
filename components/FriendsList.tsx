@@ -4,6 +4,7 @@ import { Person } from "@/database/Models";
 import { getAllPersons, getAllPersonsSorted } from "@/database/MentionService";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 export default function FriendsList() {
   const [friends, setFriends] = useState<Person[]>([]);
@@ -11,7 +12,6 @@ export default function FriendsList() {
   useEffect(() => {
     async function getFriends() {
       const result = await getAllPersonsSorted();
-      console.log("KNÜPPELSOHN: ",result);
       const mappedResult = result.map((person) => {
         return {
           ...person,
@@ -35,7 +35,7 @@ export default function FriendsList() {
           <Pressable
             key={friend.id}
             style={styles.button}
-            // onPress={() => router.push("/data-settings")}
+            onPress={() => router.push({ pathname: "/friends-detail", params: { selectedPerson: friend.id }})}
           >
             <View style={styles.buttonLeft}>
               <View style={styles.img}>
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   list: {
     width: "100%",
     alignItems: "center",
+    height: "100%",
   },
   button: {
     display: "flex",

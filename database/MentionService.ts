@@ -23,6 +23,34 @@ export async function getAllPersonsSorted(): Promise<Person[]> {
         .orderBy(desc(entries.date))
 }
 
+// get specific person by id
+export async function getPerson(id: number): Promise<Person | undefined> {
+    return await db.query.persons.findFirst({
+        where: eq(persons.id, id)
+    });
+}
+
+// get last 10 entries by mentioned person
+export async function getMentionsByPerson(id: number, page: number = 0): Promise<Omit<Entry, "perks" | "mentions">[]> {
+    const pageSize = 10;
+    const result = await db
+        .select({
+            id: entries.id,
+            date: entries.date,
+            text: entries.text,
+        })
+        .from(entryPersons)
+        .innerJoin(entries, eq(entryPersons.entryId, entries.id))
+        .where(eq(entryPersons.personId, id))
+        .orderBy(desc(entries.date))
+        .limit(pageSize)
+        .offset(page * pageSize);
+
+    console.log("RECENT MENTIONS: ", result);
+
+    return result;
+}
+
 // get all mentions for specific person
 
 // get all mentions for specific entry

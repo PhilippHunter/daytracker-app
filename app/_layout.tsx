@@ -106,6 +106,13 @@ function RootLayoutNav() {
                   headerTitle: formatDayString(route.params?.selectedDay) ?? 'Edit Entry',
                 })}
                 />
+              <Stack.Screen name="friends-detail"
+                options={() => ({
+                  headerTitle: "Friend Details",
+                  headerBackButtonDisplayMode: "generic"
+                })}
+                />
+              
             </Stack>
           </KeyboardProvider>
         </ThemeProvider>
