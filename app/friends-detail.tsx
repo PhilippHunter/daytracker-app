@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { StyledText } from "../components/StyledText";
 import { Entry, Person } from "@/database/Models";
 import { getAllPersons, getAllPersonsSorted, getMentionsByPerson, getPerson } from "@/database/MentionService";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { replaceTriggerValues } from "react-native-controlled-mentions";
 
 export default function FriendsDetail() {
   const [friend, setFriend] = useState<Person>();
@@ -20,6 +21,39 @@ export default function FriendsDetail() {
     getFriendWithData();
   }, [friendId])
 
+  function calculateTextExcerpt(entry: Omit<Entry, "perks" | "mentions">) {
+    if (!entry.text) return null;
+    const cutSize = 5;
+
+    // translate mention regexes and split into words
+    var cleanedText = replaceTriggerValues(entry.text, ({ name }) => `@${name}`);
+    var splitCleanedText = cleanedText.split(" ");
+
+    // find the first mention of specific friend
+    var mentionIndex = splitCleanedText.indexOf(`@${friend?.name}`);
+
+    // format mention
+    var formatted = splitCleanedText.map((word, index) => {
+      if (word == `@${friend?.name}`)
+        return (
+          <Text key={entry.id + "_" + index} 
+                style={{color: "lightgreen", fontWeight: "bold"}}
+          >{word + " "}</Text>
+        );
+      else return word + " ";
+    });
+
+    // get snippet: cut x words before and x words after
+    var snippet = formatted;
+    var startIndex = mentionIndex - cutSize;
+    if (startIndex > 0) {
+      snippet = snippet.slice(startIndex);
+      snippet.splice(0, 0, "...");
+    }
+    // return formatted excerpt
+    return snippet;
+  }
+
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
@@ -32,12 +66,17 @@ export default function FriendsDetail() {
           {/* <View style={styles.separator} /> */}
         </View>
         <View style={styles.list}>
-          {mentions?.map(entry => (
-            <View style={{flex: 1}}>
-              <StyledText style={{fontWeight: "bold"}}>{entry.date}</StyledText>
-              <StyledText >{entry.text}</StyledText>
-              <View style={styles.separator} />
-            </View>
+          {mentions?.map((entry, index) => (
+            <Pressable key={index} onPress={() => router.push({pathname: "/entry-modal", params: { selectedDay: entry.date }})}>
+              {index != 0 && <View style={styles.separator}/> }
+              <View style={styles.listItem}>
+                <View style={{flex: 1}}>
+                  <StyledText style={{fontWeight: "bold"}}>{entry.date}</StyledText>
+                  <StyledText numberOfLines={2}>{calculateTextExcerpt(entry)}</StyledText>
+                </View>
+                <Ionicons name="chevron-forward" size={20}/>
+              </View>
+            </Pressable>
           ))}
         </View>
       </ScrollView>
@@ -85,5 +124,11 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 25,
     margin: 25
+  },
+  listItem: {
+    flex: 1, 
+    flexDirection: "row", 
+    alignItems: "center",
+    minHeight: 60,
   }
 });
