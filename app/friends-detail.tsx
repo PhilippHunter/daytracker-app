@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyledText } from "../components/StyledText";
 import { Entry, Person } from "@/database/Models";
 import { getAllPersons, getAllPersonsSorted, getMentionsByPerson, getPerson } from "@/database/MentionService";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { replaceTriggerValues } from "react-native-controlled-mentions";
@@ -12,14 +12,26 @@ export default function FriendsDetail() {
   const [mentions, setMentions] = useState<Omit<Entry, "perks"|"mentions">[]>();
   const { selectedPerson } = useLocalSearchParams();
   const friendId = Number(selectedPerson);
+  var pageRef = useRef(0);
+  var finishedRef = useRef(false);
 
   useEffect(() => {
     function getFriendWithData() {
+      pageRef.current = 0;
       getPerson(friendId).then(setFriend);
       getMentionsByPerson(friendId).then(setMentions);
     }
     getFriendWithData();
   }, [friendId])
+
+  function handleLoadMore() {
+    pageRef.current += 1;
+    getMentionsByPerson(friendId, pageRef.current)
+      .then((result) => {
+        setMentions(prev => (prev ?? []).concat(result));
+        if (result.length == 0) finishedRef.current = true;
+    });
+  }
 
   function calculateTextExcerpt(entry: Omit<Entry, "perks" | "mentions">) {
     if (!entry.text) return null;
@@ -68,7 +80,7 @@ export default function FriendsDetail() {
         <View style={styles.list}>
           {mentions?.map((entry, index) => (
             <Pressable key={index} onPress={() => router.push({pathname: "/entry-modal", params: { selectedDay: entry.date }})}>
-              {index != 0 && <View style={styles.separator}/> }
+              {/* {index != 0 && <View style={styles.separator}/> } */}
               <View style={styles.listItem}>
                 <View style={{flex: 1}}>
                   <StyledText style={{fontWeight: "bold"}}>{entry.date}</StyledText>
@@ -76,8 +88,10 @@ export default function FriendsDetail() {
                 </View>
                 <Ionicons name="chevron-forward" size={20}/>
               </View>
+              <View style={styles.separator}/>
             </Pressable>
           ))}
+          {!finishedRef.current && <Button title="Load more" onPress={() => handleLoadMore()}></Button> }
         </View>
       </ScrollView>
     </>
@@ -123,6 +137,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 30,
     padding: 25,
+    paddingBottom: 15,
     margin: 25
   },
   listItem: {

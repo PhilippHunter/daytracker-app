@@ -32,7 +32,7 @@ export async function getPerson(id: number): Promise<Person | undefined> {
 
 // get last 10 entries by mentioned person
 export async function getMentionsByPerson(id: number, page: number = 0): Promise<Omit<Entry, "perks" | "mentions">[]> {
-    const pageSize = 10;
+    const pageSize = 5;
     const result = await db
         .select({
             id: entries.id,
