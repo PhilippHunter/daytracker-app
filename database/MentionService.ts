@@ -97,3 +97,11 @@ export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: E
         text: entry.text
     }).where(eq(entries.id, entry.id));
 }
+
+// update person fields (e.g. description)
+export async function updatePerson(id: number, patch: Partial<Person>): Promise<Person | undefined> {
+    if (Object.keys(patch).length === 0) return getPerson(id);
+
+    await db.update(persons).set(patch).where(eq(persons.id, id));
+    return getPerson(id);
+}

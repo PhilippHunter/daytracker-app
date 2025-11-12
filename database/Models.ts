@@ -15,5 +15,6 @@ export interface Perk {
 
 export interface Person {
   id: number,
-  name: string
+  name: string,
+  description: string,
 }

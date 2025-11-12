@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { StyledText } from "../components/StyledText";
 import { Entry, Person } from "@/database/Models";
-import { getAllPersons, getAllPersonsSorted, getMentionsByPerson, getPerson } from "@/database/MentionService";
-import { Button, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { getAllPersons, getAllPersonsSorted, getMentionsByPerson, getPerson, updatePerson } from "@/database/MentionService";
+import { useCallback } from "react";
+import { useFocusEffect } from "expo-router";
+import { Button, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { replaceTriggerValues } from "react-native-controlled-mentions";
@@ -10,6 +12,7 @@ import { replaceTriggerValues } from "react-native-controlled-mentions";
 export default function FriendsDetail() {
   const [friend, setFriend] = useState<Person>();
   const [mentions, setMentions] = useState<Omit<Entry, "perks"|"mentions">[]>();
+  const [description, setDescription] = useState<string>("");
   const { selectedPerson } = useLocalSearchParams();
   const friendId = Number(selectedPerson);
   var pageRef = useRef(0);
@@ -18,11 +21,52 @@ export default function FriendsDetail() {
   useEffect(() => {
     function getFriendWithData() {
       pageRef.current = 0;
-      getPerson(friendId).then(setFriend);
+      getPerson(friendId).then((friend) => {
+        setFriend(friend);
+        setDescription(friend?.description ?? "");
+      });
       getMentionsByPerson(friendId).then(setMentions);
     }
     getFriendWithData();
   }, [friendId])
+
+  // persist description 
+  // errors since is getting called when component data is already altered (cleanup)
+  async function saveDescriptionIfChanged() {
+    console.log(friend);
+    if (!friend) return;
+    const currentDescription = friend.description ?? "";
+    console.log("currentDesc: ", currentDescription);
+    if (description === currentDescription) return;
+    try {
+      const updated = await updatePerson(friend.id, { description });
+      if (updated) { 
+        setFriend(updated);
+        console.log("new desc: ", updated);
+      };
+    } catch (e) {
+      console.error("Failed to save description: ", e);
+    }
+  }
+
+  // call description save when screen loses focus (navigation blur)
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // fire-and-forget save on blur
+        console.log("blur");
+        void saveDescriptionIfChanged();
+      };
+    }, [])
+  );
+  
+  // call descripiton save on destroy (component unmount)
+  useEffect(() => {
+    return () => {
+      console.log("unmount");
+      void saveDescriptionIfChanged();
+    };
+  }, []);
 
   function handleLoadMore() {
     pageRef.current += 1;
@@ -74,7 +118,14 @@ export default function FriendsDetail() {
             <Ionicons name="person" size={64} color="grey" />
           </View>
           <StyledText style={styles.title}>{friend?.name}</StyledText>
-          <StyledText>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam atque eos molestias ab, provident ad voluptatum laborum at dicta rerum voluptates quae distinctio eveniet recusandae alias temporibus repudiandae vero ratione?</StyledText>
+          <TextInput 
+            value={description} 
+            onChangeText={setDescription} 
+            multiline={true} 
+            numberOfLines={5} 
+            placeholder="Write description here..."
+          ></TextInput>
+          {/* <StyledText>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam atque eos molestias ab, provident ad voluptatum laborum at dicta rerum voluptates quae distinctio eveniet recusandae alias temporibus repudiandae vero ratione?</StyledText> */}
           {/* <View style={styles.separator} /> */}
         </View>
         <View style={styles.list}>

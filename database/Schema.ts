@@ -57,7 +57,8 @@ export const entryPerksRelations = relations(entryPerks, ({ one }) => ({
  */
 export const persons = sqliteTable('person', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull()
+  name: text('name').notNull(),
+  description: text('description'),
   // evtl. aliases für mehrdeutige Erwähnung
 })
 
