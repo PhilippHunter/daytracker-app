@@ -33,16 +33,13 @@ export default function FriendsDetail() {
   // persist description 
   // errors since is getting called when component data is already altered (cleanup)
   async function saveDescriptionIfChanged() {
-    console.log(friend);
     if (!friend) return;
     const currentDescription = friend.description ?? "";
-    console.log("currentDesc: ", currentDescription);
     if (description === currentDescription) return;
     try {
       const updated = await updatePerson(friend.id, { description });
       if (updated) { 
         setFriend(updated);
-        console.log("new desc: ", updated);
       };
     } catch (e) {
       console.error("Failed to save description: ", e);
@@ -55,7 +52,7 @@ export default function FriendsDetail() {
       return () => {
         // fire-and-forget save on blur
         console.log("blur");
-        void saveDescriptionIfChanged();
+        // void saveDescriptionIfChanged();
       };
     }, [])
   );
@@ -64,7 +61,7 @@ export default function FriendsDetail() {
   useEffect(() => {
     return () => {
       console.log("unmount");
-      void saveDescriptionIfChanged();
+      // void saveDescriptionIfChanged();
     };
   }, []);
 
@@ -118,13 +115,13 @@ export default function FriendsDetail() {
             <Ionicons name="person" size={64} color="grey" />
           </View>
           <StyledText style={styles.title}>{friend?.name}</StyledText>
-          <TextInput 
+          {/* <TextInput 
             value={description} 
             onChangeText={setDescription} 
             multiline={true} 
             numberOfLines={5} 
             placeholder="Write description here..."
-          ></TextInput>
+          ></TextInput> */}
           {/* <StyledText>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam atque eos molestias ab, provident ad voluptatum laborum at dicta rerum voluptates quae distinctio eveniet recusandae alias temporibus repudiandae vero ratione?</StyledText> */}
           {/* <View style={styles.separator} /> */}
         </View>
