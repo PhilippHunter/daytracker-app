@@ -1,32 +1,33 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StyledText } from "./StyledText";
-import { Person } from "@/database/Models";
+import { Person, PersonWithLastMentionDTO } from "@/database/Models";
 import { getAllPersons, getAllPersonsSorted } from "@/database/MentionService";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 
 export default function FriendsList() {
-  const [friends, setFriends] = useState<Person[]>([]);
+  const [friends, setFriends] = useState<PersonWithLastMentionDTO[]>([]);
 
-  useEffect(() => {
-    async function getFriends() {
-      const result = await getAllPersonsSorted();
-      const mappedResult = result.map((person) => {
-        return {
-          ...person,
-          dayDiff: Math.floor(
-            Math.abs(new Date().getTime() - new Date(person.lastMention).getTime()) 
-            / (1000 * 60 * 60 * 24)
-          )
-        }
-      }
-      
-      );
-      setFriends(mappedResult);
-    }
-    getFriends();
-  }, [])
+  async function getFriends() {
+    console.log('loading...');
+    const result = await getAllPersonsSorted();
+    const mappedResult = result.map((person) => {
+      person.lastMention = (person.lastMention ? Math.floor(
+          Math.abs(new Date().getTime() - new Date(person.lastMention).getTime())
+          / (1000 * 60 * 60 * 24)
+        ).toString() : "-")
+      return person;
+    });
+    setFriends(mappedResult);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getFriends();
+    }, [])
+  );
 
   return (
     <>
@@ -43,7 +44,7 @@ export default function FriendsList() {
               </View>              
               <View style={styles.buttonText}>
                 <StyledText style={{fontSize: 20}}>{friend.name}</StyledText>
-                <StyledText style={{color: "grey"}}>zuletzt erwähnt vor {friend.dayDiff} Tagen</StyledText>
+                <StyledText style={{color: "grey"}}>zuletzt erwähnt vor {friend.lastMention} Tagen</StyledText>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={20}/>

@@ -18,3 +18,5 @@ export interface Person {
   name: string,
   description: string | null,
 }
+
+export type PersonWithLastMentionDTO = Person & { lastMention: string | null }

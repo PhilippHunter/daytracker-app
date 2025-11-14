@@ -1,6 +1,6 @@
 import { asc, desc, eq, max } from "drizzle-orm";
 import { db } from "./DataService";
-import { Entry, Person } from "./Models";
+import { Entry, Person, PersonWithLastMentionDTO } from "./Models";
 import { entries, entryPersons, persons } from "./Schema";
 
 // get all persons for mention suggestions
@@ -9,7 +9,7 @@ export async function getAllPersons(): Promise<Person[]> {
 }
 
 // get all persons sorted by last mention
-export async function getAllPersonsSorted(): Promise<Person[]> {
+export async function getAllPersonsSorted(): Promise<PersonWithLastMentionDTO[]> {
     return await db
         .select({
             id: persons.id,
