@@ -59,7 +59,7 @@ function RootLayoutNav() {
   const { success, error } = useMigrations(db, migrations);
 
   useEffect(() => {
-    initDrizzleDb();
+    if (success) initDrizzleDb();
   }, [success])
 
 

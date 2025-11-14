@@ -70,8 +70,8 @@ export const personsRelations = relations(persons, ({ many }) => ({
  * EntryPersons (Mention)
  */
 export const entryPersons = sqliteTable('entry_persons', {
-    entryId: integer('entry_id').references(() => entries.id),
-    personId: integer('person_id').references(() => persons.id),
+    entryId: integer('entry_id').references(() => entries.id, {onDelete: "cascade"}),
+    personId: integer('person_id').references(() => persons.id, {onDelete: "cascade"}),
   }, 
   (t) => [
     primaryKey({ columns: [t.entryId, t.personId]})

@@ -14,6 +14,7 @@ export async function getAllPersonsSorted(): Promise<Person[]> {
         .select({
             id: persons.id,
             name: persons.name,
+            description: persons.description,
             lastMention: max(entries.date)
         })
         .from(persons)
