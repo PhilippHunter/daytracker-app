@@ -14,6 +14,7 @@ import { saveEntryWithMentions } from "@/database/EntryPipeline";
 import { EntryTextInput } from "@/components/EntryTextInput";
 import { useFullScreenModalHeaderHeight } from "@/components/useFullScreenModalHeaderHeight";
 import { replaceTriggerValues } from "react-native-controlled-mentions";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // IDEE:
 // mentions lazy nachladen
@@ -112,22 +113,22 @@ export default function EntryModalScreen() {
 
       <EntryTextInput value={entryText} onChange={setEntryText} />
 
-        <View style={styles.buttonContainer}>
-          {entry.id == -1 ? (
-            <TouchableOpacity accessibilityRole="button" onPress={add} style={[styles.button, { flexGrow: 100 }]}>
-              <Ionicons name="add-outline" size={20} color="white"></Ionicons>
+      <SafeAreaView style={styles.buttonContainer}>
+        {entry.id == -1 ? (
+          <TouchableOpacity accessibilityRole="button" onPress={add} style={[styles.button, { flexGrow: 100 }]}>
+            <Ionicons name="add-outline" size={20} color="white"></Ionicons>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity accessibilityRole="button" onPress={destroy} style={styles.button}>
+              <Ionicons name="trash" size={15} color="white"></Ionicons>
             </TouchableOpacity>
-          ) : (
-            <>
-              <TouchableOpacity accessibilityRole="button" onPress={destroy} style={styles.button}>
-                <Ionicons name="trash" size={15} color="white"></Ionicons>
-              </TouchableOpacity>
-              <Pressable accessibilityRole="button" onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
-                <Ionicons name="checkmark" size={15} color="white"></Ionicons>
-              </Pressable>
-            </>
-          )}
-        </View>
+            <Pressable accessibilityRole="button" onPress={update} style={({pressed}) => [styles.button, { flexGrow: 100, opacity: pressed ? 0.3 : 1 }]}>
+              <Ionicons name="checkmark" size={15} color="white"></Ionicons>
+            </Pressable>
+          </>
+        )}
+      </SafeAreaView>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
@@ -150,7 +151,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexShrink: 0,
     flexDirection: "row",
-    padding: 20,
+    paddingTop: 10,
+    paddingHorizontal: 20
   },
   button: {
     gap: 5,
