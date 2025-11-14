@@ -44,6 +44,25 @@ export default function InfoScreen() {
       </View>
 
       <View style={styles.section}>
+        <Ionicons name="people-outline" size={28} color="#6a66ff" style={[styles.icon, { marginTop: 10 }]} />
+        <StyledText style={styles.sectionTitle}>Friends</StyledText>
+        <StyledText style={styles.paragraph}>
+          Add people by mentioning them in an entry. Mentioned people are collected into the Friends list, accessible through the Tab Menu.
+        </StyledText>
+
+        <StyledText style={styles.paragraph}>
+          Tap a friend to open their profile and see all entries that mention them.
+        </StyledText>
+
+        <View style={styles.tipBox}>
+          <Ionicons name="information-circle-outline" size={18} color="#3867d6" />
+          <StyledText style={styles.tipText}>
+            Tip: Create a friend by typing @ followed by their name when writing an entry — the app extracts mentions automatically.
+          </StyledText>
+        </View>
+      </View>
+
+      <View style={styles.section}>
         <Ionicons name="checkmark-done-outline" size={32} color="#20bf6b" style={styles.icon} />
         <StyledText style={styles.sectionTitle}>Save & Review</StyledText>
         <StyledText style={styles.paragraph}>
