@@ -1,6 +1,6 @@
 import { db } from "./DataService";
-import { Perk } from "./Models";
-import { perks } from './Schema';
+import { Perk } from "../Models";
+import { perks } from '../Schema';
 import { eq } from "drizzle-orm";
 
 

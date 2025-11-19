@@ -7,7 +7,7 @@ import { Suspense, useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { db, initDrizzleDb } from '../database/DataService';
+import { db, initDrizzleDb } from '../database/Services/DataService';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations'
 import { SQLiteProvider } from 'expo-sqlite';

@@ -1,6 +1,6 @@
-import { createEntry, updateEntry } from "./EntryService";
-import { saveMentionsToEntry } from "./MentionService";
-import { Entry } from "./Models";
+import { createEntry, updateEntry } from "../Services/EntryService";
+import { saveMentionsToEntry } from "../Services/MentionService";
+import { Entry } from "../Models";
 
 
 // creates or updates Entry with handling Mentions

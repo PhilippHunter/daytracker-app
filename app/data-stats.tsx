@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "@/components/Themed";
-import { getClosestFriend, getEntryTotalCount, getHighestDayStreak } from "../database/StatsService";
+import * as StatsService from "../database/Services/StatsService";
 import { StyledText } from "@/components/StyledText";
 import { Person } from "@/database/Models";
 
@@ -11,9 +11,9 @@ export default function DataStatsScreen() {
   const [closestFriend, setClosestFriend] = useState<Person>();
 
   useEffect(() => {
-    getEntryTotalCount().then(setTotalEntries);
-    getHighestDayStreak().then(setHighestDayStreak);
-    getClosestFriend().then((friend) => {
+    StatsService.getEntryTotalCount().then(setTotalEntries);
+    StatsService.getHighestDayStreak().then(setHighestDayStreak);
+    StatsService.getClosestFriend().then((friend) => {
       if (friend) {
         setClosestFriend(friend);
       }

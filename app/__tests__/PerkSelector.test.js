@@ -1,7 +1,7 @@
 import { defaultPerks } from '@/constants/Perks';
 import PerkSelector from '../../components/PerkSelector';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { getAllPerks } from '@/database/EntryService';
+import * as EntryService from '@/database/Services/EntryService';
 import { experimental_LayoutConformance } from 'react-native';
 
 it(`Perks inside PerkSelector are selectable`, async () => {
@@ -32,7 +32,7 @@ it(`Perks inside PerkSelector are selectable`, async () => {
 it('Perks inside PerkSelector initially selected andn deselectable', async () => {
     // ARRANGE
     const mockFunction = jest.fn((perk) => console.log(`${perk.title} tapped`));
-    const allPerks = await getAllPerks();
+    const allPerks = await EntryService.getAllPerks();
     const selectedPerk = allPerks[0];
     // console.log("selected perk: ", selectedPerk);
     // render the UI

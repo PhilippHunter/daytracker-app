@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView, View } from "react-native";
 import { Perk } from "@/database/Models";
-import { getAllPerks } from "@/database/PerkService";
+import * as PerkService from "@/database/Services/PerkService";
 import PerkComponent from "./Perk";
 
 interface PerkSelectorProps {
@@ -15,7 +15,7 @@ export default function PerkSelector({selectedPerks, onPerkToggle}: PerkSelector
   useEffect(() => {
     const fetchPerks = async function () {
       try {
-        const allPerks = await getAllPerks();
+        const allPerks = await PerkService.getAllPerks();
         setAvailablePerks(allPerks);
         console.log("Fetched perks: ", allPerks);
       } catch (error) {

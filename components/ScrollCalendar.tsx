@@ -1,7 +1,7 @@
 import { CalendarList } from "react-native-calendars";
 import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { getAllEntriesForOverview } from "@/database/EntryService";
+import * as EntryService from "@/database/Services/EntryService";
 import { Entry } from "@/database/Models";
 
 export default function ScrollCalendar() {
@@ -22,7 +22,7 @@ export default function ScrollCalendar() {
     useCallback(() => {
       const fetchEntries = async function () {
         try {
-          const allEntries = await getAllEntriesForOverview();
+          const allEntries = await EntryService.getAllEntriesForOverview();
           setEntries(allEntries);
           console.log("Fetched entries: ", allEntries);
         } catch (error) {

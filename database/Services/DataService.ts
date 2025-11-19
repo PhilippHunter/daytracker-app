@@ -2,8 +2,8 @@ import * as SQLite from "expo-sqlite";
 import AsyncStorage from 'expo-sqlite/kv-store';
 import { defaultPerks } from "@/constants/Perks";
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import * as schema from "./Schema";
-import { perks, entries, entryPerks } from './Schema';
+import * as schema from "../Schema";
+import { perks, entries, entryPerks } from '../Schema';
 
 // export const db = SQLite.openDatabaseSync("daytracker.db");
 const expoDb = SQLite.openDatabaseSync("drizzle-db");

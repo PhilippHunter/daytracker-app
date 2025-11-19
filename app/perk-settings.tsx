@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text } from "@/components/Themed";
 import { Perk } from "../database/Models";
-import { createPerk, deletePerk, getAllPerks, updatePerk } from "@/database/PerkService";
+import * as PerkService from "@/database/Services/PerkService";
 import PerkEditModal from "./perk-edit-modal";
 import PerkComponent from "@/components/Perk";
 import { useFocusEffect } from "expo-router";
@@ -20,7 +20,7 @@ export default function PerkSettingsScreen() {
   );
 
   async function fetchPerks() {
-    const data = await getAllPerks();
+    const data = await PerkService.getAllPerks();
     setPerks(data);
   }
 
@@ -33,9 +33,9 @@ export default function PerkSettingsScreen() {
     console.log("Saving perk: ", perk);
     try {
       if (!perk.id) {
-        await createPerk(perk);
+        await PerkService.createPerk(perk);
       } else {
-        await updatePerk(perk);
+        await PerkService.updatePerk(perk);
       }
       fetchPerks();
       setModalVisible(false);
@@ -58,7 +58,7 @@ export default function PerkSettingsScreen() {
         { text: "Cancel", style: "cancel" },
         { text: "Delete", style: "destructive", onPress: async () => {
             try {
-              await deletePerk(perk);
+              await PerkService.deletePerk(perk);
               fetchPerks();
               console.log("Deleted sucessfully!");
             } catch (error) {

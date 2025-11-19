@@ -1,6 +1,6 @@
 import { db } from "./DataService";
-import { Entry } from "./Models";
-import { entries, entryPerks } from './Schema';
+import { Entry } from "../Models";
+import { entries, entryPerks } from '../Schema';
 import { eq } from "drizzle-orm";
 
 const relations: Parameters<typeof db.query.entries.findFirst>[0] = {

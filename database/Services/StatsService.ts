@@ -1,8 +1,8 @@
 import * as SQLite from "expo-sqlite";
-import { Entry, Perk, Person } from "./Models";
+import { Entry, Perk, Person } from "../Models";
 import { defaultPerks } from "@/constants/Perks";
 import { db } from "./DataService";
-import { entries, entryPersons, persons } from "./Schema";
+import { entries, entryPersons, persons } from "../Schema";
 import { asc, count, countDistinct, desc, eq } from "drizzle-orm";
 
 export async function getEntryTotalCount() {

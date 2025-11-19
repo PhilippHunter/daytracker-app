@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { StyledText } from "../components/StyledText";
 import { Entry, Person } from "@/database/Models";
-import { getAllPersons, getAllPersonsSorted, getMentionsByPerson, getPerson, updatePerson } from "@/database/MentionService";
+import * as MentionService from "@/database/Services/MentionService";
 import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { Button, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -21,11 +21,11 @@ export default function FriendsDetail() {
   useEffect(() => {
     function getFriendWithData() {
       pageRef.current = 0;
-      getPerson(friendId).then((friend) => {
+      MentionService.getPerson(friendId).then((friend) => {
         setFriend(friend);
         setDescription(friend?.description ?? "");
       });
-      getMentionsByPerson(friendId).then(setMentions);
+      MentionService.getMentionsByPerson(friendId).then(setMentions);
     }
     getFriendWithData();
   }, [friendId])
@@ -37,7 +37,7 @@ export default function FriendsDetail() {
     const currentDescription = friend.description ?? "";
     if (description === currentDescription) return;
     try {
-      const updated = await updatePerson(friend.id, { description });
+      const updated = await MentionService.updatePerson(friend.id, { description });
       if (updated) { 
         setFriend(updated);
       };
@@ -67,7 +67,7 @@ export default function FriendsDetail() {
 
   function handleLoadMore() {
     pageRef.current += 1;
-    getMentionsByPerson(friendId, pageRef.current)
+    MentionService.getMentionsByPerson(friendId, pageRef.current)
       .then((result) => {
         setMentions(prev => (prev ?? []).concat(result));
         if (result.length == 0) finishedRef.current = true;

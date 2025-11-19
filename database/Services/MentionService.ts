@@ -1,7 +1,9 @@
 import { asc, desc, eq, max } from "drizzle-orm";
 import { db } from "./DataService";
-import { Entry, Person, PersonWithLastMentionDTO } from "./Models";
-import { entries, entryPersons, persons } from "./Schema";
+import { Entry, Person, PersonWithLastMentionDTO } from "../Models";
+import { entries, entryPersons, persons } from "../Schema";
+import * as MentionRepo from "../Repositories/MentionRepository";
+import * as MentionUtils from "../Utilities/MentionUtils";
 
 // get all persons for mention suggestions
 export async function getAllPersons(): Promise<Person[]> {
@@ -31,7 +33,7 @@ export async function getPerson(id: number): Promise<Person | undefined> {
     });
 }
 
-// get last 10 entries by mentioned person
+// get last 10 entries for specific person
 export async function getMentionsByPerson(id: number, page: number = 0): Promise<Omit<Entry, "perks" | "mentions">[]> {
     const pageSize = 5;
     const result = await db
@@ -52,51 +54,32 @@ export async function getMentionsByPerson(id: number, page: number = 0): Promise
     return result;
 }
 
-// get all mentions for specific person
-
-// get all mentions for specific entry
-
 // save mentions to entry
 export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: Entry): Promise<void> {
-    // remove existing mentions if any
-    await db.delete(entryPersons).where(eq(entryPersons.entryId, entry.id));
-
-    if (uniqueMentionNames.length == 0 || !entry.text) return;
-
-    // find unique linked persons
-    const linkedPersons: Person[] = [];
-    for (const mentionName of uniqueMentionNames) {
-        let personToLink = await db.query.persons.findFirst({
-            where: eq(persons.name, mentionName)
-        });
-        // create person if not exists
-        if (!personToLink) {
-            [personToLink] = await db.insert(persons).values({
-                name: mentionName
-            }).returning();
-        }
-        linkedPersons.push(personToLink);
-    }
-    if (linkedPersons.length !== uniqueMentionNames.length) {
-        throw new Error("Not all linked persons could be retreived or created.");
-    }
-
-    // link persons with entry
-    await db.insert(entryPersons).values(linkedPersons.map((person) => ({
-        entryId: entry.id,
-        personId: person.id
-    })));
-
-    // re-parse linked persons in entry text to make them appear formatted
-    for (const linkedPerson of linkedPersons) {
-        entry.text = entry.text?.replaceAll(
-            `@${linkedPerson.name}`, 
-            `{@}[${linkedPerson.name}](${linkedPerson.id})`
-        );
-    }
-    await db.update(entries).set({
-        text: entry.text
-    }).where(eq(entries.id, entry.id));
+    await db.transaction(async (tx) => {
+        // remove existing mentions if any
+        // TODO: move to repo
+        await tx.delete(entryPersons).where(eq(entryPersons.entryId, entry.id));
+        
+        if (uniqueMentionNames.length == 0 || !entry.text) return;
+        
+        // find or create linked persons
+        const linkedPersons = await MentionRepo.findOrCreatePersonsFromMentionNames(uniqueMentionNames, tx);
+        
+        // link persons with entry
+        // TODO: move to repo
+        await tx.insert(entryPersons).values(linkedPersons.map((person) => ({
+            entryId: entry.id,
+            personId: person.id
+        })));
+        
+        // re-parse linked persons in entry text to make them appear formatted
+        entry.text = MentionUtils.encodeLinkedPersonsInText(linkedPersons, entry.text);
+        // TODO: move to repo
+        await tx.update(entries).set({
+            text: entry.text
+        }).where(eq(entries.id, entry.id));
+    })
 }
 
 // update person fields (e.g. description)

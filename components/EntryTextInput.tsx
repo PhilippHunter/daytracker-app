@@ -2,7 +2,7 @@ import { FC, useEffect } from 'react';
 import { LayoutChangeEvent, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Suggestion, SuggestionsProvidedProps, TriggersConfig, useMentions } from 'react-native-controlled-mentions';
 import { useState } from 'react';
-import { getAllPersons } from '@/database/MentionService';
+import * as MentionService from '@/database/Services/MentionService';
 import { placeholderSnippets } from "@/constants/TextSnippets";
 
 
@@ -20,7 +20,7 @@ export function Suggestions({keyword, onSelect}: SuggestionsProvidedProps) {
   const [suggestions, setSuggestions] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    getAllPersons().then((persons => (
+    MentionService.getAllPersons().then((persons => (
       setSuggestions(persons.map(person => ({
         ...person,
         id: person.id.toString()

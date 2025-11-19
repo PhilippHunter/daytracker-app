@@ -7,10 +7,10 @@ import PerkSelector from "@/components/PerkSelector";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
-import { createEntry, deleteEntry, getEntry, updateEntry } from "@/database/EntryService";
+import * as EntryService from "@/database/Services/EntryService";
 import { Entry, Perk } from "../database/Models";
 import { StyledText } from "../components/StyledText";
-import { saveEntryWithMentions } from "@/database/EntryPipeline";
+import * as EntryPipeline from "@/database/Utilities/EntryPipeline";
 import { EntryTextInput } from "@/components/EntryTextInput";
 import { useFullScreenModalHeaderHeight } from "@/components/useFullScreenModalHeaderHeight";
 import { replaceTriggerValues } from "react-native-controlled-mentions";
@@ -35,7 +35,7 @@ export default function EntryModalScreen() {
   const headerHeight = useFullScreenModalHeaderHeight();
 
   useEffect(() => {
-    getEntry(dayParam).then((fetchedEntry) => {
+    EntryService.getEntry(dayParam).then((fetchedEntry) => {
       if (fetchedEntry) {
         console.log("Eintrag: ", fetchedEntry);
         setEntry(fetchedEntry);
@@ -60,7 +60,7 @@ export default function EntryModalScreen() {
     try {
       console.log("adding entry");
       entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
-      const newEntry = await saveEntryWithMentions(entry);
+      const newEntry = await EntryPipeline.saveEntryWithMentions(entry);
       setEntry(newEntry);
       setEntryText(newEntry.text ?? "");
     } catch (error) {
@@ -73,7 +73,7 @@ export default function EntryModalScreen() {
     try {
       console.log("updating entry");
       entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
-      await saveEntryWithMentions(entry);
+      await EntryPipeline.saveEntryWithMentions(entry);
     } catch (error) {
       // Show error msg
       console.log(error);
@@ -84,7 +84,7 @@ export default function EntryModalScreen() {
     try {
       console.log("deleting entry");
       entry.text = entryText;
-      await deleteEntry(entry);
+      await EntryService.deleteEntry(entry);
       router.dismiss();
     } catch (error) {
       // Show error msg

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { StyledText } from "./StyledText";
 import { Person, PersonWithLastMentionDTO } from "@/database/Models";
-import { getAllPersons, getAllPersonsSorted } from "@/database/MentionService";
+import * as MentionService from "@/database/Services/MentionService";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -12,7 +12,7 @@ export default function FriendsList() {
 
   async function getFriends() {
     console.log('loading...');
-    const result = await getAllPersonsSorted();
+    const result = await MentionService.getAllPersonsSorted();
     const mappedResult = result.map((person) => {
       person.lastMention = (person.lastMention ? Math.floor(
           Math.abs(new Date().getTime() - new Date(person.lastMention).getTime())
