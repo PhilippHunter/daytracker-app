@@ -39,7 +39,7 @@ export default function EntryModalScreen() {
       if (fetchedEntry) {
         console.log("Eintrag: ", fetchedEntry);
         setEntry(fetchedEntry);
-        setEntryText(fetchedEntry.text);
+        setEntryText(fetchedEntry.text ?? "");
       }
     });
   }, [dayParam]);
@@ -62,7 +62,7 @@ export default function EntryModalScreen() {
       entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
       const newEntry = await saveEntryWithMentions(entry);
       setEntry(newEntry);
-      setEntryText(newEntry.text);
+      setEntryText(newEntry.text ?? "");
     } catch (error) {
       // Show error msg
       console.log(error);
