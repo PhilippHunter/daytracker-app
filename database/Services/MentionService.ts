@@ -58,24 +58,19 @@ export async function getMentionsByPerson(id: number, page: number = 0): Promise
 export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: Entry): Promise<void> {
     await db.transaction(async (tx) => {
         // remove existing mentions if any
-        // TODO: move to repo
-        await tx.delete(entryPersons).where(eq(entryPersons.entryId, entry.id));
+        await MentionRepo.remove(entry.id, tx);
         
         if (uniqueMentionNames.length == 0 || !entry.text) return;
         
         // find or create linked persons
-        const linkedPersons = await MentionRepo.findOrCreatePersonsFromMentionNames(uniqueMentionNames, tx);
+        const linkedPersons = await MentionRepo.findOrCreatePersons(uniqueMentionNames, tx);
         
         // link persons with entry
-        // TODO: move to repo
-        await tx.insert(entryPersons).values(linkedPersons.map((person) => ({
-            entryId: entry.id,
-            personId: person.id
-        })));
+        await MentionRepo.create(linkedPersons, entry, tx);
         
         // re-parse linked persons in entry text to make them appear formatted
         entry.text = MentionUtils.encodeLinkedPersonsInText(linkedPersons, entry.text);
-        // TODO: move to repo
+        // TODO: move to entry repo
         await tx.update(entries).set({
             text: entry.text
         }).where(eq(entries.id, entry.id));
@@ -85,7 +80,6 @@ export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: E
 // update person fields (e.g. description)
 export async function updatePerson(id: number, patch: Partial<Person>): Promise<Person | undefined> {
     if (Object.keys(patch).length === 0) return getPerson(id);
-
-    await db.update(persons).set(patch).where(eq(persons.id, id));
-    return getPerson(id);
+    
+    return await MentionRepo.updatePerson(id, patch);
 }
