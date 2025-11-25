@@ -1,10 +1,10 @@
 import { createEntry, updateEntry } from "../Services/EntryService";
 import { saveMentionsToEntry } from "../Services/MentionService";
-import { Entry } from "../Models";
+import { Entry, EntryWithRelations } from "../Models";
 
 
 // creates or updates Entry with handling Mentions
-export async function saveEntryWithMentions(entry: Entry): Promise<Entry> {
+export async function saveEntryWithMentions(entry: EntryWithRelations): Promise<EntryWithRelations> {
     if (entry.id == -1) {
         const newEntry = await createEntry(entry);
         entry = newEntry;

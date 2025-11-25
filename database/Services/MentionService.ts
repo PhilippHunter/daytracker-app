@@ -5,54 +5,29 @@ import { entries, entryPersons, persons } from "../Schema";
 import * as MentionRepo from "../Repositories/MentionRepository";
 import * as MentionUtils from "../Utilities/MentionUtils";
 import * as PersonRepo from "../Repositories/PersonRepository";
+import * as EntryRepo from "../Repositories/EntryRepository";
+import { DBClient } from "../Utilities/TransactionUtil";
 
 // get all persons for mention suggestions
-export async function getAllPersons(): Promise<Person[]> {
-    // TODO: think about moving to repo
-    return await db.query.persons.findMany();
+export async function getAllPersons(sorted: boolean = false): Promise<Person[] | PersonWithLastMentionDTO[]> {
+    if (!sorted)
+        return await PersonRepo.getAll();
+    else 
+        return await PersonRepo.getAllSorted();
 }
 
-// get all persons sorted by last mention
-export async function getAllPersonsSorted(): Promise<PersonWithLastMentionDTO[]> {
-    // TODO: think about moving to repo
-    return await db
-        .select({
-            id: persons.id,
-            name: persons.name,
-            description: persons.description,
-            lastMention: max(entries.date)
-        })
-        .from(persons)
-        .leftJoin(entryPersons, eq(persons.id, entryPersons.personId))
-        .leftJoin(entries, eq(entryPersons.entryId, entries.id))
-        .groupBy(persons.id)
-        .orderBy(desc(entries.date))
-}
 
-// get last 10 entries for specific person
+// get last x entries for specific person
 export async function getMentionsByPerson(id: number, page: number = 0): Promise<Omit<Entry, "perks" | "mentions">[]> {
-    const pageSize = 5;
-    const result = await db
-        .select({
-            id: entries.id,
-            date: entries.date,
-            text: entries.text,
-        })
-        .from(entryPersons)
-        .innerJoin(entries, eq(entryPersons.entryId, entries.id))
-        .where(eq(entryPersons.personId, id))
-        .orderBy(desc(entries.date))
-        .limit(pageSize)
-        .offset(page * pageSize);
+    return await MentionRepo.find(id, page);
+}
 
-    console.log("RECENT MENTIONS: ", result);
-
-    return result;
+export async function find(personId: number, dbClient: DBClient = db): Promise<Person | undefined> {
+    return await PersonRepo.find(personId);
 }
 
 // save mentions to entry
 export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: Entry): Promise<void> {
-    // TODO: think about moving to repo
     await db.transaction(async (tx) => {
         // remove existing mentions if any
         await MentionRepo.remove(entry.id, tx);
@@ -67,10 +42,7 @@ export async function saveMentionsToEntry(uniqueMentionNames: string[], entry: E
         
         // re-parse linked persons in entry text to make them appear formatted
         entry.text = MentionUtils.encodeLinkedPersonsInText(linkedPersons, entry.text);
-        // TODO: move to entry repo
-        await tx.update(entries).set({
-            text: entry.text
-        }).where(eq(entries.id, entry.id));
+        await EntryRepo.update(entry.id, entry, tx);
     })
 }
 

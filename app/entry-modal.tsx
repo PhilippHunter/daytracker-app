@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import * as EntryService from "@/database/Services/EntryService";
-import { Entry, Perk } from "../database/Models";
+import { Entry, EntryWithRelations, Perk } from "../database/Models";
 import { StyledText } from "../components/StyledText";
 import * as EntryPipeline from "@/database/Utilities/EntryPipeline";
 import { EntryTextInput } from "@/components/EntryTextInput";
@@ -25,7 +25,7 @@ export default function EntryModalScreen() {
   const modalParams = useLocalSearchParams();
   const dayParam = modalParams.selectedDay as string;
   const [entryText, setEntryText] = useState<string>("");
-  const [entry, setEntry] = useState<Entry>({
+  const [entry, setEntry] = useState<EntryWithRelations>({
     id: -1,
     date: dayParam,
     text: "",

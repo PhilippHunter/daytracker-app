@@ -12,7 +12,7 @@ export default function FriendsList() {
 
   async function getFriends() {
     console.log('loading...');
-    const result = await MentionService.getAllPersonsSorted();
+    const result = await MentionService.getAllPersons(true) as PersonWithLastMentionDTO[];
     const mappedResult = result.map((person) => {
       person.lastMention = (person.lastMention ? Math.floor(
           Math.abs(new Date().getTime() - new Date(person.lastMention).getTime())

@@ -11,7 +11,7 @@ import { replaceTriggerValues } from "react-native-controlled-mentions";
 
 export default function FriendsDetail() {
   const [friend, setFriend] = useState<Person>();
-  const [mentions, setMentions] = useState<Omit<Entry, "perks"|"mentions">[]>();
+  const [mentions, setMentions] = useState<Entry[]>();
   const [description, setDescription] = useState<string>("");
   const { selectedPerson } = useLocalSearchParams();
   const friendId = Number(selectedPerson);
@@ -21,7 +21,7 @@ export default function FriendsDetail() {
   useEffect(() => {
     function getFriendWithData() {
       pageRef.current = 0;
-      MentionService.getPerson(friendId).then((friend) => {
+      MentionService.find(friendId).then((friend) => {
         setFriend(friend);
         setDescription(friend?.description ?? "");
       });

@@ -1,7 +1,9 @@
 import { db } from "./DataService";
-import { Entry } from "../Models";
+import { Entry, EntryWithRelations } from "../Models";
 import { entries, entryPerks } from '../Schema';
 import { eq } from "drizzle-orm";
+
+// TODO: rework with new Repository structure
 
 const relations: Parameters<typeof db.query.entries.findFirst>[0] = {
   with: {
@@ -28,7 +30,7 @@ const relations: Parameters<typeof db.query.entries.findFirst>[0] = {
 
 
 // Fetch all entries for calendar view
-export async function getAllEntriesForOverview() : Promise<Omit<Entry, "text">[]> {
+export async function getAllEntriesForOverview() : Promise<Omit<EntryWithRelations, "text">[]> {
   try {
     // Get all entries (without text)
     const result = await db.query.entries.findMany({
@@ -48,7 +50,7 @@ export async function getAllEntriesForOverview() : Promise<Omit<Entry, "text">[]
 }
 
 // Fetch all day entries
-export async function getAllEntries(): Promise<Entry[]> {
+export async function getAllEntries(): Promise<EntryWithRelations[]> {
   try {
     const result = await db.query.entries.findMany(relations);
     return result.map((entry) => mapEntry(entry));
@@ -59,7 +61,7 @@ export async function getAllEntries(): Promise<Entry[]> {
 }
 
 // Fetch one specific day entry
-export async function getEntry(dateString: string): Promise<Entry | null> {
+export async function getEntry(dateString: string): Promise<EntryWithRelations | null> {
   try {
     // Fetch the entry by date
     const entry = await db.query.entries.findFirst({
@@ -75,7 +77,7 @@ export async function getEntry(dateString: string): Promise<Entry | null> {
 }
 
 // Fetch one specific day entry by id
-async function getEntryById(id: number): Promise<Entry | null> {
+async function getEntryById(id: number): Promise<EntryWithRelations | null> {
   try {
     // Fetch the entry by id
     const entry = await db.query.entries.findFirst({
@@ -93,7 +95,7 @@ async function getEntryById(id: number): Promise<Entry | null> {
 // Add a new entry
 // TODO: add perk validation (existence)
 // TODO: add field validation (full Entry field must be provided)
-export async function createEntry(entry: Entry): Promise<Entry> {
+export async function createEntry(entry: EntryWithRelations): Promise<EntryWithRelations> {
   try {
     let insertedEntryId: number | null = null;
     await db.transaction(async (tx) => {
@@ -134,7 +136,7 @@ export async function createEntry(entry: Entry): Promise<Entry> {
 }
 
 // Update existing entry
-export async function updateEntry(entry: Entry): Promise<void> {
+export async function updateEntry(entry: EntryWithRelations): Promise<void> {
   try {
     await db.transaction(async (tx) => {
       // update entry
@@ -172,12 +174,12 @@ export async function deleteEntry(entry: Entry): Promise<void> {
   }
 }
 
-function mapEntry(inputEntry: any): Entry {
+function mapEntry(inputEntry: any): EntryWithRelations {
   if (!inputEntry) return inputEntry;
 
   return {
     ...inputEntry,
     perks: inputEntry.entryPerks.map((ep: any) => ep.perk),
     mentions: inputEntry.entryPersons.map((ep: any) => ep.person)
-  } as Entry;
+  } as EntryWithRelations;
 }
