@@ -1,7 +1,9 @@
 import { db } from "./DataService";
 import { Entry, EntryWithRelations } from "../Models";
-import { entries, entryPerks } from '../Schema';
-import { eq } from "drizzle-orm";
+import * as EntryRepo from "../Repositories/EntryRepository";
+import * as EntryPerkRepo from "../Repositories/EntryPerkRepository";
+import * as MentionUtils from "../Utilities/MentionUtils";
+import * as MentionService from "../Services/MentionService";
 
 // TODO: rework with new Repository structure
 
@@ -30,6 +32,7 @@ const relations: Parameters<typeof db.query.entries.findFirst>[0] = {
 
 
 // Fetch all entries for calendar view
+// TODO: think about neccesity of this extra load func
 export async function getAllEntriesForOverview() : Promise<Omit<EntryWithRelations, "text">[]> {
   try {
     // Get all entries (without text)
@@ -52,7 +55,7 @@ export async function getAllEntriesForOverview() : Promise<Omit<EntryWithRelatio
 // Fetch all day entries
 export async function getAllEntries(): Promise<EntryWithRelations[]> {
   try {
-    const result = await db.query.entries.findMany(relations);
+    const result = await EntryRepo.getAll();
     return result.map((entry) => mapEntry(entry));
   } catch (error) {
     console.error("Failed to fetch entries: ", error);
@@ -64,10 +67,7 @@ export async function getAllEntries(): Promise<EntryWithRelations[]> {
 export async function getEntry(dateString: string): Promise<EntryWithRelations | null> {
   try {
     // Fetch the entry by date
-    const entry = await db.query.entries.findFirst({
-      ...relations,
-      where: eq(entries.date, dateString)
-    });
+    const entry = await EntryRepo.findByDate(dateString);
 
     return mapEntry(entry);
   } catch(error) {
@@ -80,10 +80,7 @@ export async function getEntry(dateString: string): Promise<EntryWithRelations |
 async function getEntryById(id: number): Promise<EntryWithRelations | null> {
   try {
     // Fetch the entry by id
-    const entry = await db.query.entries.findFirst({
-      ...relations,
-      where: eq(entries.id, id)
-    });
+    const entry = await EntryRepo.find(id);
 
     return mapEntry(entry);
   } catch(error) {
@@ -100,24 +97,20 @@ export async function createEntry(entry: EntryWithRelations): Promise<EntryWithR
     let insertedEntryId: number | null = null;
     await db.transaction(async (tx) => {
       // insert whole entry into entries table
-      const [insertedEntry] = await tx
-        .insert(entries)
-        .values({
-          date: entry.date,
-          text: entry.text
-        })
-        .returning({ id: entries.id });
+      const insertedEntry = await EntryRepo.create(entry, tx);
 
       // insert entry.perks into entryPerks relation (entry_perks table)
       if (insertedEntry && entry.perks && entry.perks.length != 0) {
-        await tx.insert(entryPerks).values(
-          entry.perks.map(perk => ({
-            entryId: insertedEntry.id,
-            perkId: perk.id
-          }))
-        );
+        await EntryPerkRepo.create(insertedEntry, entry.perks, tx);
       }
       insertedEntryId = insertedEntry.id;
+  
+      // handle mentions in text
+      if (entry.text) {
+        const uniqueMentionNames = MentionUtils.extractUniqueMentions(entry.text);
+        console.log("MENTIONS: ", uniqueMentionNames);
+        await MentionService.saveMentionsToEntry(uniqueMentionNames, insertedEntry);
+      }
     });
     if (!insertedEntryId) {
       throw new Error("Failed to create entry.");
@@ -136,26 +129,26 @@ export async function createEntry(entry: EntryWithRelations): Promise<EntryWithR
 }
 
 // Update existing entry
+// TODO: maybe restructure entryPipeline into here, so that everything starts in the service
 export async function updateEntry(entry: EntryWithRelations): Promise<void> {
   try {
     await db.transaction(async (tx) => {
       // update entry
-      await tx.update(entries).set({
-        date: entry.date,
-        text: entry.text,
-      }).where(eq(entries.id, entry.id));
+      await EntryRepo.update(entry.id, entry, tx);
     
       // delete related perks
-      await tx.delete(entryPerks).where(eq(entryPerks.entryId, entry.id));
+      await EntryPerkRepo.remove(entry, tx);
 
       // re-add related perks
       if (entry.perks && entry.perks.length != 0) {
-        await tx.insert(entryPerks).values(
-          entry.perks.map(perk => ({
-            entryId: entry.id,
-            perkId: perk.id
-          }))
-        );
+        await EntryPerkRepo.create(entry, entry.perks, tx);
+      }
+
+      // handle mentions in text
+      if (entry.text) {
+          const uniqueMentionNames = MentionUtils.extractUniqueMentions(entry.text);
+          console.log("MENTIONS: ", uniqueMentionNames);
+          await MentionService.saveMentionsToEntry(uniqueMentionNames, entry);
       }
     });
   } catch (error) {
@@ -167,7 +160,7 @@ export async function updateEntry(entry: EntryWithRelations): Promise<void> {
 // Delete existing entry
 export async function deleteEntry(entry: Entry): Promise<void> {
   try {
-    await db.delete(entries).where(eq(entries.id, entry.id));
+    await EntryRepo.remove(entry.id);
   } catch (error) {
     console.error(`Failed to update Entry with date ${entry.date}: `, error)
     throw error;

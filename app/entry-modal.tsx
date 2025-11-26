@@ -10,7 +10,6 @@ import { useEffect } from "react";
 import * as EntryService from "@/database/Services/EntryService";
 import { Entry, EntryWithRelations, Perk } from "../database/Models";
 import { StyledText } from "../components/StyledText";
-import * as EntryPipeline from "@/database/Utilities/EntryPipeline";
 import { EntryTextInput } from "@/components/EntryTextInput";
 import { useFullScreenModalHeaderHeight } from "@/components/useFullScreenModalHeaderHeight";
 import { replaceTriggerValues } from "react-native-controlled-mentions";
@@ -60,7 +59,7 @@ export default function EntryModalScreen() {
     try {
       console.log("adding entry");
       entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
-      const newEntry = await EntryPipeline.saveEntryWithMentions(entry);
+      const newEntry = await EntryService.createEntry(entry);
       setEntry(newEntry);
       setEntryText(newEntry.text ?? "");
     } catch (error) {
@@ -73,7 +72,7 @@ export default function EntryModalScreen() {
     try {
       console.log("updating entry");
       entry.text = replaceTriggerValues(entryText, ({ name }) => `@${name}`);
-      await EntryPipeline.saveEntryWithMentions(entry);
+      await EntryService.updateEntry(entry);
     } catch (error) {
       // Show error msg
       console.log(error);
